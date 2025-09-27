@@ -25,410 +25,831 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-        html, body {
-            height: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            -webkit-font-smoothing: antialiased;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            line-height: 1.6;
-            overflow-y: auto;
-        }
-        body.message-active {
-            filter: blur(5px);
-            pointer-events: none;
-        }
-        #main-container {
-            width: 100%;
-            max-width: 900px;
-            padding: 20px;
-            text-align: center;
-        }
-        .intro-text {
-            font-size: 1.25rem;
-            margin-bottom: 20px;
-        }
-        #script-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            width: 100%;
-            margin-bottom: 40px;
-        }
-        .card {
-            background-color: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            text-align: left;
-            border: 1px solid var(--border);
+            font-family: 'Segoe UI', monospace;
             transition: var(--transition);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        }
+        body {
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+            line-height: 1.5;
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .floating-search {
+            position: sticky;
+            top: 15px;
+            z-index: 100;
+            margin-bottom: 15px;
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: linear-gradient(to right, rgba(30, 30, 30, 0.8), rgba(20, 20, 20, 0.9));
+        }
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: rgba(30, 30, 30, 0.6);
+            color: var(--text-color);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            outline: none;
+            background: linear-gradient(to right, rgba(25, 25, 25, 0.7), rgba(20, 20, 20, 0.8));
+        }
+        .search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+            background: linear-gradient(to right, rgba(35, 35, 35, 0.7), rgba(25, 25, 25, 0.8));
+        }
+        .filter-select {
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            color: var(--text-color);
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+            background: rgba(25, 25, 25, 0.7);
+        }
+        .filter-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+            background: rgba(25, 25, 25, 0.8);
+        }
+        .tabs {
+            display: flex;
+            background: rgba(30, 30, 30, 0.6);
+            border-radius: var(--radius-md);
+            padding: 3px;
+            border: 1px solid var(--border);
+            width: fit-content;
+            margin: 0 auto 15px;
+            background: linear-gradient(to right, rgba(25, 25, 25, 0.7), rgba(20, 20, 20, 0.8));
+        }
+        .tab {
+            padding: 6px 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .tab.active {
+            background: var(--accent-color);
+            color: black;
+            box-shadow: 0 2px 6px rgba(255, 255, 255, 0.3);
+            background: linear-gradient(to right, white, #e0e0e0);
+        }
+        .scripts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            animation: fadeIn 0.8s ease;
+        }
+        @media (max-width: 1000px) {
+            .scripts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .scripts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .script-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            opacity: 0;
+            animation: cardEnter 0.5s ease forwards;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(25, 25, 25, 0.7), rgba(15, 15, 15, 0.8));
+            border-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) 1;
         }
-        .card:hover {
+        @keyframes cardEnter {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .script-card:hover {
+            transform: translateY(-3px);
             border-color: var(--accent-color);
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+            background: linear-gradient(to bottom, rgba(35, 35, 35, 0.7), rgba(25, 25, 25, 0.8));
         }
-        .card-title {
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin-bottom: 10px;
+        .script-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent-color);
+            color: black;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            z-index: 2;
+            background: linear-gradient(to right, white, #e0e0e0);
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
         }
-        .card-description {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 15px;
+        .script-image-container {
+            width: 100%;
+            height: 140px;
+            overflow: hidden;
+            position: relative;
+        }
+        .script-image-container::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(to top, rgba(15, 15, 15, 0.9), transparent);
+            z-index: 1;
+        }
+        .script-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .script-card:hover .script-image {
+            transform: scale(1.05);
+        }
+        .script-content {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
             flex-grow: 1;
         }
-        .card-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .btn {
-            background-color: transparent;
-            color: var(--text-color);
-            border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: var(--transition);
+        .script-title {
             font-size: 0.9rem;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .btn:hover {
-            border-color: var(--accent-color);
-            transform: translateY(-2px);
-        }
-        .btn-primary {
-            background-color: var(--accent-color);
-            color: var(--bg-color);
             font-weight: 600;
-            border-color: var(--accent-color);
-        }
-        .btn-primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
-        }
-        .btn-secondary {
-            background-color: rgba(255, 255, 255, 0.1);
+            margin-bottom: 6px;
             color: var(--text-color);
-            border: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .btn-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: none;
+        .script-info {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-        #message-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 20px 40px;
-            z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease-in-out;
-            font-size: 1.2rem;
+        .script-info i {
+            color: var(--accent-color);
+            width: 12px;
             text-align: center;
+            font-size: 0.8rem;
         }
-        #message-box.show {
-            opacity: 1;
-            pointer-events: auto;
+        .script-stats {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 8px;
+            font-size: 0.75rem;
         }
-        #modal {
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-secondary);
+        }
+        .stat-item i {
+            color: var(--accent-color);
+            font-size: 0.7rem;
+        }
+        .modal {
             display: none;
             position: fixed;
-            z-index: 10;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            justify-content: center;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
             align-items: center;
-            animation: fadeIn 0.3s ease-in-out;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .modal.active {
+            display: flex;
+            opacity: 1;
         }
         .modal-content {
-            background-color: var(--card-bg);
-            padding: 25px;
+            background: var(--card-bg);
             border-radius: var(--radius-lg);
             width: 90%;
-            max-width: 700px;
-            position: relative;
-            animation: slideUp 0.3s ease-out;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(to bottom, rgba(25, 25, 25, 0.95), rgba(15, 15, 15, 0.98));
         }
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .modal.active .modal-content {
+            transform: translateY(0);
         }
         .modal-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            background: linear-gradient(to right, rgba(30, 30, 30, 0.9), rgba(25, 25, 25, 0.95));
         }
         .modal-title {
-            font-size: 1.5rem;
+            font-size: 1rem;
             font-weight: 600;
+            color: var(--accent-color);
         }
-        .close-btn {
+        .modal-close {
+            background: none;
+            border: none;
             color: var(--text-secondary);
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
-            transition: var(--transition);
         }
-        .close-btn:hover {
+        .modal-close:hover {
             color: var(--accent-color);
         }
         .modal-body {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: calc(70vh - 80px);
         }
-        .modal-body p {
-            font-size: 1rem;
+        .modal-script {
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            font-family: 'Poppins', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 0.8rem;
+            color: var(--text-color);
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            background: linear-gradient(to bottom, rgba(30, 30, 30, 0.8), rgba(25, 25, 25, 0.9));
+        }
+        .modal-footer {
+            padding: 10px 15px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end; /* Căn chỉnh nút Save và Copy sang phải */
+            gap: 8px;
+            background: linear-gradient(to right, rgba(30, 30, 30, 0.9), rgba(25, 25, 25, 0.95));
+        }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .btn-primary {
+            background: var(--accent-color);
+            color: black;
+            background: linear-gradient(to right, white, #e0e0e0);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #e0e0e0, white);
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+        }
+        .btn-secondary {
+            background: rgba(40, 40, 40, 0.8);
+            color: var(--text-color);
+            border: 1px solid var(--border);
+            background: linear-gradient(to right, rgba(35, 35, 35, 0.8), rgba(30, 30, 30, 0.9));
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(to right, rgba(45, 45, 45, 0.8), rgba(40, 40, 40, 0.9));
+            border-color: var(--accent-color);
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+        }
+        .btn-success:hover {
+            background: linear-gradient(to right, #2E7D32, #4CAF50);
+        }
+        .btn-execute {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-execute:hover {
+            background: linear-gradient(to right, #c62828, #f44336);
+        }
+        .notification {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: var(--accent-color);
+            color: black;
+            padding: 8px 15px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: none;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2s forwards;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
+            background: linear-gradient(to right, white, #e0e0e0);
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 30px 15px;
             color: var(--text-secondary);
         }
-        #script-content {
-            background-color: #111;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            max-height: 400px;
-            overflow-y: auto;
-            color: #f8f8f2;
-            font-size: 0.9rem;
+        .empty-state i {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            opacity: 0.7;
         }
-        .modal-actions {
+        .empty-state h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: var(--text-color);
+        }
+        .empty-state p {
+            font-size: 0.8rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .remove-script-btn {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            z-index: 2;
+            font-size: 0.6rem;
+            background: linear-gradient(to bottom, #f44336, #c62828);
         }
-        #local-scripts-section {
-            width: 100%;
-            max-width: 900px;
-            margin-top: 40px;
-            text-align: left;
+        .remove-script-btn:hover {
+            background: linear-gradient(to bottom, #c62828, #f44336);
         }
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
+        .script-card:hover .remove-script-btn {
+            opacity: 1;
         }
-        #local-scripts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+        .content-section {
+            display: none;
         }
-        .local-script-card {
-            background-color: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: var(--transition);
-        }
-        .local-script-card:hover {
-            border-color: var(--accent-color);
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-        .local-script-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .message-success {
-            color: var(--success);
-            font-weight: bold;
-        }
-        .message-danger {
-            color: var(--danger);
-            font-weight: bold;
+        .content-section.active {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div id="main-container">
-        <h1 class="intro-text">Scripthub</h1>
-        <div id="script-grid"></div>
-    </div>
-    <div id="message-box"></div>
-    <div id="modal">
+    <div class="modal" id="scriptModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title" id="modal-script-title"></h2>
-                <span class="close-btn">&times;</span>
+                <h3 class="modal-title" id="modalTitle">Script Details</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <div class="modal-body">
-                <p id="modal-script-description"></p>
-                <div id="script-content"></div>
-                <div class="modal-actions">
-                    <button id="execute-script-btn" class="btn btn-primary">
-                        <i class="fas fa-play"></i> Run Script
-                    </button>
-                    <button id="save-script-btn" class="btn btn-secondary">
-                        <i class="fas fa-save"></i> Save to Collection
-                    </button>
-                    <button id="copy-script-btn" class="btn btn-secondary">
-                        <i class="fas fa-copy"></i> Copy Script
-                    </button>
+                <div class="modal-script" id="modalScriptContent">Loading script...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="saveScriptBtn">
+                    <i class="fas fa-bookmark"></i>
+                    Save Script
+                </button>
+                <button class="btn btn-primary" id="modalCopyButton">
+                    <i class="fas fa-copy"></i>
+                    Copy Script
+                </button>
                 </div>
+        </div>
+    </div>
+    <div class="floating-search">
+        <input type="text" class="search-input" placeholder="Search scripts..." id="searchInput">
+        <select class="filter-select" id="scriptType">
+            <option value="">All</option>
+            <option value="free">Free</option>
+            <option value="paid">Paid</option>
+        </select>
+        <select class="filter-select" id="sortBy">
+            <option value="updatedAt">Recent</option>
+            <option value="views">Popular</option>
+        </select>
+        <select class="filter-select" id="maxResults">
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="cloud">Cloud Scripts</div>
+        <div class="tab" data-tab="saved">Saved Scripts</div>
+    </div>
+    <div class="content-section active" id="cloudScripts">
+        <div class="scripts-grid" id="scriptsContainer">
+            <div class="empty-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <h3>Loading scripts...</h3>
             </div>
         </div>
     </div>
-    <div id="local-scripts-section" style="display: none;">
-        <h2 class="section-title">Your Collection</h2>
-        <div id="local-scripts-grid"></div>
+    <div class="content-section" id="savedScripts">
+        <div class="scripts-grid" id="localScriptsGrid">
+            <div class="empty-state">
+                <i class="fas fa-book-open"></i>
+                <h3>No saved scripts</h3>
+                <p>Save scripts by clicking the bookmark icon in the script modal</p>
+            </div>
+        </div>
+    </div>
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span>Script copied!</span>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scripts = [
-                // Load scripts from script_files
-                { "name": "Dark Mode", "description": "Toggles a dark mode on websites.", "script": "document.body.style.backgroundColor = 'black'; document.body.style.color = 'white';" },
-                { "name": "Go to Top", "description": "Scrolls to the top of the page.", "script": "window.scrollTo(0, 0);" },
-                { "name": "Highlight Images", "description": "Highlights all images on the page.", "script": "document.querySelectorAll('img').forEach(img => { img.style.border = '2px solid red'; });" },
-                { "name": "Change Font", "description": "Changes the font of all text to a more readable one.", "script": "document.body.style.fontFamily = 'Arial, sans-serif';" },
-            ];
-
-            const scriptGrid = document.getElementById('script-grid');
-            const modal = document.getElementById('modal');
-            const closeBtn = document.querySelector('.close-btn');
-            const modalTitle = document.getElementById('modal-script-title');
-            const modalDescription = document.getElementById('modal-script-description');
-            const scriptContent = document.getElementById('script-content');
-            const executeScriptBtn = document.getElementById('execute-script-btn');
-            const saveScriptBtn = document.getElementById('save-script-btn');
-            const copyScriptBtn = document.getElementById('copy-script-btn');
-            const messageBox = document.getElementById('message-box');
-            const localScriptsSection = document.getElementById('local-scripts-section');
-            const localScriptsGrid = document.getElementById('local-scripts-grid');
-            let currentScript = null;
-
-            function showMessage(message, type = 'success') {
-                messageBox.textContent = message;
-                messageBox.className = 'message-box show';
-                messageBox.classList.add(type === 'success' ? 'message-success' : 'message-danger');
-                document.body.classList.add('message-active');
-                setTimeout(() => {
-                    messageBox.className = 'message-box';
-                    document.body.classList.remove('message-active');
-                }, 3000);
-            }
-
-            function getLocalScripts() {
-                const scripts = localStorage.getItem('userScripts');
-                return scripts ? JSON.parse(scripts) : [];
-            }
-
-            function saveLocalScripts(scripts) {
-                localStorage.setItem('userScripts', JSON.stringify(scripts));
-            }
-
-            function renderScripts(scriptsToRender, container) {
-                container.innerHTML = '';
-                scriptsToRender.forEach((script, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-title">${script.name}</div>
-                        <div class="card-description">${script.description}</div>
-                        <div class="card-actions">
-                            <button class="btn btn-primary" data-index="${index}">View Details</button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                    card.querySelector('.btn-primary').addEventListener('click', () => {
-                        currentScript = script;
-                        modalTitle.textContent = script.name;
-                        modalDescription.textContent = script.description;
-                        scriptContent.textContent = script.script;
-                        saveScriptBtn.style.display = 'inline-flex';
-                        saveScriptBtn.classList.remove('btn-success');
-                        saveScriptBtn.classList.add('btn-secondary');
-                        saveScriptBtn.innerHTML = '<i class="fas fa-save"></i> Save to Collection';
-                        
-                        const localScripts = getLocalScripts();
-                        if (localScripts.some(s => s.name === currentScript.name)) {
-                            saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
-                            saveScriptBtn.classList.add('btn-success');
-                            saveScriptBtn.classList.remove('btn-secondary');
-                        }
-                        
-                        modal.style.display = 'flex';
-                    });
-                });
-            }
-
-            function loadScripts() {
-                renderScripts(scripts, scriptGrid);
-                const localScripts = getLocalScripts();
-                if (localScripts.length > 0) {
-                    localScriptsSection.style.display = 'block';
-                    renderScripts(localScripts, localScriptsGrid);
-                }
-            }
-
-            closeBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            window.onclick = (event) => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
+        let scriptsData = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentScriptIndex = -1;
+        let currentScript = null;
+        const proxies = [
+            'https://corsproxy.io/?',
+            'https://api.codetabs.com/v1/proxy/?quest=',
+            'https://thingproxy.freeboard.io/fetch/',
+        ];
+        let currentProxy = 0;
+        let currentTab = 'cloud';
+        function getLocalScripts() {
+            const scripts = localStorage.getItem('savedScripts');
+            return scripts ? JSON.parse(scripts) : [];
+        }
+        function saveLocalScript(script) {
+            const scripts = getLocalScripts();
+            
+            // Tối ưu hóa: Chỉ lưu các thuộc tính chuỗi cần thiết để tránh lỗi [object Object]
+            const scriptToSave = {
+                title: script.title || 'Untitled',
+                script: script.script || '',
+                image: script.image || null,
+                game: script.game?.name || script.game || null, // Xử lý game name nếu có
+                date: script.updatedAt || new Date().toISOString()
             };
 
-            copyScriptBtn.addEventListener('click', () => {
+            if (!scripts.some(s => s.title === scriptToSave.title && s.script === scriptToSave.script)) {
+                scripts.push(scriptToSave);
+                localStorage.setItem('savedScripts', JSON.stringify(scripts));
+                return true;
+            }
+            return false;
+        }
+        function removeLocalScript(index) {
+            const scripts = getLocalScripts();
+            scripts.splice(index, 1);
+            localStorage.setItem('savedScripts', JSON.stringify(scripts));
+            renderLocalScripts();
+            return scripts;
+        }
+        function renderLocalScripts() {
+            const container = document.getElementById('localScriptsGrid');
+            const scripts = getLocalScripts();
+            if (scripts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <h3>No saved scripts</h3>
+                        <p>Save scripts by clicking the bookmark icon in the script modal</p>
+                    </div>
+                `;
+                return;
+            }
+            let html = '';
+            scripts.forEach((script, index) => {
+                // Đảm bảo script.game được hiển thị dưới dạng chuỗi
+                const gameName = script.game && typeof script.game === 'object' ? script.game.name : script.game || 'No game specified';
+                
+                html += `
+                    <div class="script-card" style="animation-delay: ${index * 0.05}s">
+                        <button class="remove-script-btn" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="script-image-container">
+                            <img
+                                src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc='}"
+                                class="script-image"
+                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
+                            >
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="${script.title}">${script.title}</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                ${gameName}
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>${script.date ? new Date(script.date).toLocaleDateString() : 'N/A'}</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" data-index="${index}" data-local="true" style="width: 100%; margin-top: auto;">
+                                <i class="fas fa-copy"></i>
+                                Copy Script
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            document.querySelectorAll('#localScriptsGrid .btn-primary').forEach(btn => {
+                btn.addEventListener('click', handleLocalCopy);
+            });
+            document.querySelectorAll('.remove-script-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = btn.dataset.index;
+                    removeLocalScript(index);
+                    showMessage('Script removed from your collection');
+                });
+            });
+            document.querySelectorAll('#localScriptsGrid .script-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    const index = Array.from(card.parentElement.children).indexOf(card);
+                    // Mở modal để xem chi tiết
+                    openScriptModal(index, true); 
+                });
+            });
+        }
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.toggle('active', section.id === `${tab}Scripts`);
+            });
+            if (tab === 'saved') {
+                renderLocalScripts();
+            }
+        }
+        async function fetchWithTimeout(url, timeout = 5000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                clearTimeout(id);
+                throw error;
+            }
+        }
+        async function loadScripts(search = '', page = 1) {
+            const container = document.getElementById('scriptsContainer');
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><h3>Loading scripts...</h3></div>';
+            try {
+                const scriptType = document.getElementById('scriptType').value;
+                const sortBy = document.getElementById('sortBy').value;
+                const maxResults = document.getElementById('maxResults').value;
+                let apiUrl = new URL('https://scriptblox.com/api/script/fetch');
+                if (search) {
+                    apiUrl = new URL('https://scriptblox.com/api/script/search');
+                    apiUrl.searchParams.append('q', search);
+                }
+                apiUrl.searchParams.append('page', page);
+                apiUrl.searchParams.append('max', maxResults);
+                if (scriptType) apiUrl.searchParams.append('mode', scriptType);
+                if (sortBy) apiUrl.searchParams.append('sortBy', sortBy);
+                let data;
+                try {
+                    data = await fetchWithTimeout(apiUrl.toString(), 7000);
+                } catch (directError) {
+                    console.log('Direct fetch failed, trying proxy...');
+                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(apiUrl.toString());
+                    data = await fetchWithTimeout(proxyUrl, 7000);
+                }
+                if (data && data.result && data.result.scripts) {
+                    scriptsData = data.result.scripts;
+                    totalPages = data.result.totalPages || 1;
+                } else if (data && Array.isArray(data)) {
+                    scriptsData = data;
+                    totalPages = 1;
+                } else {
+                    scriptsData = [];
+                    totalPages = 1;
+                }
+                currentPage = page;
+                renderScripts();
+            } catch (error) {
+                console.error('Error fetching scripts:', error);
+                showMessage(`Error: ${error.message}`);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Failed to load scripts</h3>
+                        <p>We couldn't connect to the server. Please check your internet connection and try again.</p>
+                    </div>
+                `;
+            }
+        }
+        function renderScripts() {
+            const container = document.getElementById('scriptsContainer');
+            if (scriptsData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>No scripts found</h3>
+                        <p>Try adjusting your search or filters to find what you're looking for.</p>
+                    </div>
+                `;
+                return;
+            }
+            let html = '';
+            scriptsData.forEach((script, index) => {
+                const raw = script.image;
+                const imageUrl = raw
+                    ? (raw.startsWith('http') ? raw : `https://scriptblox.com${raw}`)
+                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc=';
+                html += `
+                    <div class="script-card" style="animation-delay: ${index * 0.05}s" data-index="${index}">
+                        ${script.paid ? '<span class="script-badge">Premium</span>' : ''}
+                        <div class="script-image-container">
+                            <img
+                                src="${imageUrl}"
+                                class="script-image"
+                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+SW1hZ2UgRXJyb3I8L3RleHQ+PC9zdmc='"
+                            >
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="${script.title}">${script.title}</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                ${script.game?.name || 'No game specified'}
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>${script.views?.toLocaleString() || 'N/A'}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>${script.likeCount?.toLocaleString() || 'N/A'}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>${script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            document.querySelectorAll('.script-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    const index = card.dataset.index;
+                    openScriptModal(index);
+                });
+            });
+        }
+        function openScriptModal(index, isLocal = false) {
+            let script;
+            if (isLocal) {
+                const scripts = getLocalScripts();
+                script = scripts[index];
+                currentScript = {...script, isLocal: true, localIndex: index};
+            } else {
+                script = scriptsData[index];
+                currentScript = {...script, isLocal: false, index: index};
+            }
+            if (!script) return;
+            const modal = document.getElementById('scriptModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalScriptContent');
+            const saveScriptBtn = document.getElementById('saveScriptBtn');
+            modalTitle.textContent = script.title;
+            // Đảm bảo hiển thị thuộc tính script
+            modalContent.textContent = script.script || 'No script content available'; 
+            const scripts = getLocalScripts();
+            // Kiểm tra script hiện tại với các thuộc tính cần thiết
+            const isSaved = scripts.some(s => s.title === script.title && s.script === script.script); 
+            if (isSaved) {
+                saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+                saveScriptBtn.classList.add('btn-success');
+                saveScriptBtn.classList.remove('btn-secondary');
+            } else {
+                saveScriptBtn.innerHTML = '<i class="fas fa-bookmark"></i> Save Script';
+                saveScriptBtn.classList.remove('btn-success'); // Đảm bảo lớp success bị xóa
+                saveScriptBtn.classList.add('btn-secondary');
+            }
+            modal.classList.add('active');
+        }
+        function showMessage(message) {
+            const notification = document.getElementById('notification');
+            notification.querySelector('span').textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const scriptType = document.getElementById('scriptType');
+            const sortBy = document.getElementById('sortBy');
+            const maxResults = document.getElementById('maxResults');
+            const modal = document.getElementById('scriptModal');
+            const modalClose = document.getElementById('modalClose');
+            const modalCopyButton = document.getElementById('modalCopyButton');
+            const saveScriptBtn = document.getElementById('saveScriptBtn');
+            const tabs = document.querySelectorAll('.tab');
+            searchInput.addEventListener('input', () => {
+                setTimeout(() => loadScripts(searchInput.value), 500);
+            });
+            scriptType.addEventListener('change', () => loadScripts(searchInput.value));
+            sortBy.addEventListener('change', () => loadScripts(searchInput.value));
+            maxResults.addEventListener('change', () => loadScripts(searchInput.value));
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+            modalClose.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+            modalCopyButton.addEventListener('click', () => {
                 if (currentScript && currentScript.script) {
                     navigator.clipboard.writeText(currentScript.script)
                         .then(() => showMessage('Script copied!'))
                         .catch(err => console.error('Could not copy text: ', err));
                 }
             });
-
             saveScriptBtn.addEventListener('click', () => {
                 if (currentScript) {
-                    const localScripts = getLocalScripts();
-                    const isAlreadySaved = localScripts.some(s => s.name === currentScript.name);
-                    if (!isAlreadySaved) {
-                        localScripts.push(currentScript);
-                        saveLocalScripts(localScripts);
-                        loadScripts();
-                        showMessage('Script saved to your collection!');
+                    const success = saveLocalScript(currentScript);
+                    if (success) {
+                        showMessage('Script saved successfully!');
                         saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
                         saveScriptBtn.classList.add('btn-success');
                         saveScriptBtn.classList.remove('btn-secondary');
@@ -437,16 +858,8 @@
                     }
                 }
             });
-            executeScriptBtn.addEventListener('click', () => {
-                if (currentScript && currentScript.script) {
-                    const script = document.createElement('script');
-                    script.textContent = currentScript.script;
-                    document.body.appendChild(script);
-                    showMessage('Script executed successfully!');
-                } else {
-                    showMessage('No script to execute.');
-                }
-            });
+            // LOGIC EXECUTE ĐÃ ĐƯỢC XÓA THEO YÊU CẦU
+            
             loadScripts();
         });
         function handleLocalCopy(event) {
