@@ -329,7 +329,7 @@
             padding: 10px 15px;
             border-top: 1px solid var(--border);
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end; /* Căn chỉnh nút Save và Copy sang phải */
             gap: 8px;
             background: linear-gradient(to right, rgba(30, 30, 30, 0.9), rgba(25, 25, 25, 0.95));
         }
@@ -476,11 +476,7 @@
                     <i class="fas fa-copy"></i>
                     Copy Script
                 </button>
-                <button class="btn btn-execute" id="executeScriptBtn">
-                    <i class="fas fa-play"></i>
-                    Execute
-                </button>
-            </div>
+                </div>
         </div>
     </div>
     <div class="floating-search">
@@ -544,8 +540,18 @@
         }
         function saveLocalScript(script) {
             const scripts = getLocalScripts();
-            if (!scripts.some(s => s.title === script.title && s.script === script.script)) {
-                scripts.push(script);
+            
+            // Tối ưu hóa: Chỉ lưu các thuộc tính chuỗi cần thiết để tránh lỗi [object Object]
+            const scriptToSave = {
+                title: script.title || 'Untitled',
+                script: script.script || '',
+                image: script.image || null,
+                game: script.game?.name || script.game || null, // Xử lý game name nếu có
+                date: script.updatedAt || new Date().toISOString()
+            };
+
+            if (!scripts.some(s => s.title === scriptToSave.title && s.script === scriptToSave.script)) {
+                scripts.push(scriptToSave);
                 localStorage.setItem('savedScripts', JSON.stringify(scripts));
                 return true;
             }
@@ -573,6 +579,9 @@
             }
             let html = '';
             scripts.forEach((script, index) => {
+                // Đảm bảo script.game được hiển thị dưới dạng chuỗi
+                const gameName = script.game && typeof script.game === 'object' ? script.game.name : script.game || 'No game specified';
+                
                 html += `
                     <div class="script-card" style="animation-delay: ${index * 0.05}s">
                         <button class="remove-script-btn" data-index="${index}">
@@ -580,7 +589,7 @@
                         </button>
                         <div class="script-image-container">
                             <img
-                                src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}"
+                                src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc='}"
                                 class="script-image"
                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
                             >
@@ -589,7 +598,7 @@
                             <h3 class="script-title" title="${script.title}">${script.title}</h3>
                             <p class="script-info">
                                 <i class="fas fa-gamepad"></i>
-                                ${script.game || 'No game specified'}
+                                ${gameName}
                             </p>
                             <div class="script-stats">
                                 <div class="stat-item">
@@ -621,8 +630,8 @@
                 card.addEventListener('click', (e) => {
                     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
                     const index = Array.from(card.parentElement.children).indexOf(card);
-                    const scripts = getLocalScripts();
-                    openScriptModal(index, true);
+                    // Mở modal để xem chi tiết
+                    openScriptModal(index, true); 
                 });
             });
         }
@@ -718,7 +727,7 @@
                 const raw = script.image;
                 const imageUrl = raw
                     ? (raw.startsWith('http') ? raw : `https://scriptblox.com${raw}`)
-                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc=';
                 html += `
                     <div class="script-card" style="animation-delay: ${index * 0.05}s" data-index="${index}">
                         ${script.paid ? '<span class="script-badge">Premium</span>' : ''}
@@ -726,7 +735,7 @@
                             <img
                                 src="${imageUrl}"
                                 class="script-image"
-                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
+                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+SW1hZ2UgRXJyb3I8L3RleHQ+PC9zdmc='"
                             >
                         </div>
                         <div class="script-content">
@@ -778,15 +787,19 @@
             const modalContent = document.getElementById('modalScriptContent');
             const saveScriptBtn = document.getElementById('saveScriptBtn');
             modalTitle.textContent = script.title;
-            modalContent.textContent = script.script || 'No script content available';
+            // Đảm bảo hiển thị thuộc tính script
+            modalContent.textContent = script.script || 'No script content available'; 
             const scripts = getLocalScripts();
-            const isSaved = scripts.some(s => s.title === script.title && s.script === script.script);
+            // Kiểm tra script hiện tại với các thuộc tính cần thiết
+            const isSaved = scripts.some(s => s.title === script.title && s.script === script.script); 
             if (isSaved) {
                 saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
                 saveScriptBtn.classList.add('btn-success');
                 saveScriptBtn.classList.remove('btn-secondary');
             } else {
                 saveScriptBtn.innerHTML = '<i class="fas fa-bookmark"></i> Save Script';
+                saveScriptBtn.classList.remove('btn-success'); // Đảm bảo lớp success bị xóa
+                saveScriptBtn.classList.add('btn-secondary');
             }
             modal.classList.add('active');
         }
@@ -807,7 +820,6 @@
             const modalClose = document.getElementById('modalClose');
             const modalCopyButton = document.getElementById('modalCopyButton');
             const saveScriptBtn = document.getElementById('saveScriptBtn');
-            const executeScriptBtn = document.getElementById('executeScriptBtn');
             const tabs = document.querySelectorAll('.tab');
             searchInput.addEventListener('input', () => {
                 setTimeout(() => loadScripts(searchInput.value), 500);
@@ -846,19 +858,8 @@
                     }
                 }
             });
-            executeScriptBtn.addEventListener('click', () => {
-                if (currentScript && currentScript.script) {
-                    try {
-                        eval(currentScript.script);
-                        showMessage('Script executed successfully!');
-                    } catch (e) {
-                        console.error('Error executing script:', e);
-                        showMessage('Error executing script!');
-                    }
-                } else {
-                    showMessage('No script to execute.');
-                }
-            });
+            // LOGIC EXECUTE ĐÃ ĐƯỢC XÓA THEO YÊU CẦU
+            
             loadScripts();
         });
         function handleLocalCopy(event) {
