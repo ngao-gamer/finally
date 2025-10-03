@@ -522,357 +522,412 @@
         <span>Script copied!</span>
     </div>
     <script>
-        let scriptsData = [];
-        let currentPage = 1;
-        let totalPages = 1;
-        let currentScriptIndex = -1;
-        let currentScript = null;
-        const proxies = [
-            'https://corsproxy.io/?',
-            'https://api.codetabs.com/v1/proxy/?quest=',
-            'https://thingproxy.freeboard.io/fetch/',
-        ];
-        let currentProxy = 0;
-        let currentTab = 'cloud';
-        function getLocalScripts() {
-            const scripts = localStorage.getItem('savedScripts');
-            return scripts ? JSON.parse(scripts) : [];
-        }
-        function saveLocalScript(script) {
-            const scripts = getLocalScripts();
-            
-            // Tối ưu hóa: Chỉ lưu các thuộc tính chuỗi cần thiết để tránh lỗi [object Object]
-            const scriptToSave = {
-                title: script.title || 'Untitled',
-                script: script.script || '',
-                image: script.image || null,
-                game: script.game?.name || script.game || null, // Xử lý game name nếu có
-                date: script.updatedAt || new Date().toISOString()
-            };
+    let scriptsData = [];
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentScriptIndex = -1;
+    let currentScript = null;
+    
+    // Tên của các proxy
+    const PROXIES = [
+        'https://corsproxy.io/?',
+        'https://api.codetabs.com/v1/proxy/?quest=',
+        // Thêm một proxy khác nếu cần
+    ];
+    let currentTab = 'cloud';
+    
+    function getLocalScripts() {
+        const scripts = localStorage.getItem('savedScripts');
+        return scripts ? JSON.parse(scripts) : [];
+    }
+    
+    function saveLocalScript(script) {
+        const scripts = getLocalScripts();
+        
+        const scriptToSave = {
+            title: script.title || 'Untitled',
+            script: script.script || '',
+            image: script.image || null,
+            game: script.game?.name || script.game || null, 
+            date: script.updatedAt || new Date().toISOString()
+        };
 
-            if (!scripts.some(s => s.title === scriptToSave.title && s.script === scriptToSave.script)) {
-                scripts.push(scriptToSave);
-                localStorage.setItem('savedScripts', JSON.stringify(scripts));
-                return true;
-            }
-            return false;
-        }
-        function removeLocalScript(index) {
-            const scripts = getLocalScripts();
-            scripts.splice(index, 1);
+        if (!scripts.some(s => s.title === scriptToSave.title && s.script === scriptToSave.script)) {
+            scripts.push(scriptToSave);
             localStorage.setItem('savedScripts', JSON.stringify(scripts));
-            renderLocalScripts();
-            return scripts;
+            return true;
         }
-        function renderLocalScripts() {
-            const container = document.getElementById('localScriptsGrid');
-            const scripts = getLocalScripts();
-            if (scripts.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-book-open"></i>
-                        <h3>No saved scripts</h3>
-                        <p>Save scripts by clicking the bookmark icon in the script modal</p>
+        return false;
+    }
+    
+    function removeLocalScript(index) {
+        const scripts = getLocalScripts();
+        scripts.splice(index, 1);
+        localStorage.setItem('savedScripts', JSON.stringify(scripts));
+        renderLocalScripts();
+        return scripts;
+    }
+    
+    function renderLocalScripts() {
+        const container = document.getElementById('localScriptsGrid');
+        const scripts = getLocalScripts();
+        if (scripts.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-book-open"></i>
+                    <h3>No saved scripts</h3>
+                    <p>Save scripts by clicking the bookmark icon in the script modal</p>
+                </div>
+            `;
+            return;
+        }
+        let html = '';
+        scripts.forEach((script, index) => {
+            const gameName = script.game && typeof script.game === 'object' ? script.game.name : script.game || 'No game specified';
+            
+            html += `
+                <div class="script-card" style="animation-delay: ${index * 0.05}s">
+                    <button class="remove-script-btn" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="script-image-container">
+                        <img
+                            src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc='}"
+                            class="script-image"
+                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
+                        >
                     </div>
-                `;
-                return;
-            }
-            let html = '';
-            scripts.forEach((script, index) => {
-                // Đảm bảo script.game được hiển thị dưới dạng chuỗi
-                const gameName = script.game && typeof script.game === 'object' ? script.game.name : script.game || 'No game specified';
-                
-                html += `
-                    <div class="script-card" style="animation-delay: ${index * 0.05}s">
-                        <button class="remove-script-btn" data-index="${index}">
-                            <i class="fas fa-times"></i>
+                    <div class="script-content">
+                        <h3 class="script-title" title="${script.title}">${script.title}</h3>
+                        <p class="script-info">
+                            <i class="fas fa-gamepad"></i>
+                            ${gameName}
+                        </p>
+                        <div class="script-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>${script.date ? new Date(script.date).toLocaleDateString() : 'N/A'}</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" data-index="${index}" data-local="true" style="width: 100%; margin-top: auto;">
+                            <i class="fas fa-copy"></i>
+                            Copy Script
                         </button>
-                        <div class="script-image-container">
-                            <img
-                                src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc='}"
-                                class="script-image"
-                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
-                            >
-                        </div>
-                        <div class="script-content">
-                            <h3 class="script-title" title="${script.title}">${script.title}</h3>
-                            <p class="script-info">
-                                <i class="fas fa-gamepad"></i>
-                                ${gameName}
-                            </p>
-                            <div class="script-stats">
-                                <div class="stat-item">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    <span>${script.date ? new Date(script.date).toLocaleDateString() : 'N/A'}</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-primary" data-index="${index}" data-local="true" style="width: 100%; margin-top: auto;">
-                                <i class="fas fa-copy"></i>
-                                Copy Script
-                            </button>
-                        </div>
                     </div>
-                `;
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('#localScriptsGrid .btn-primary').forEach(btn => {
+            btn.addEventListener('click', handleLocalCopy);
+        });
+        document.querySelectorAll('.remove-script-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = btn.dataset.index;
+                removeLocalScript(index);
+                showMessage('Script removed from your collection');
             });
-            container.innerHTML = html;
-            document.querySelectorAll('#localScriptsGrid .btn-primary').forEach(btn => {
-                btn.addEventListener('click', handleLocalCopy);
+        });
+        document.querySelectorAll('#localScriptsGrid .script-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                const index = Array.from(card.parentElement.children).indexOf(card);
+                openScriptModal(index, true); 
             });
-            document.querySelectorAll('.remove-script-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const index = btn.dataset.index;
-                    removeLocalScript(index);
-                    showMessage('Script removed from your collection');
-                });
-            });
-            document.querySelectorAll('#localScriptsGrid .script-card').forEach(card => {
-                card.addEventListener('click', (e) => {
-                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-                    const index = Array.from(card.parentElement.children).indexOf(card);
-                    // Mở modal để xem chi tiết
-                    openScriptModal(index, true); 
-                });
-            });
+        });
+    }
+    
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tab);
+        });
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.toggle('active', section.id === `${tab}Scripts`);
+        });
+        if (tab === 'saved') {
+            renderLocalScripts();
         }
-        function switchTab(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.tab').forEach(t => {
-                t.classList.toggle('active', t.dataset.tab === tab);
-            });
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.toggle('active', section.id === `${tab}Scripts`);
-            });
-            if (tab === 'saved') {
-                renderLocalScripts();
+    }
+    
+    async function fetchWithTimeout(url, timeout = 7000) {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+        try {
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(id);
+            if (!response.ok) {
+                // Rút ngắn lỗi để hiển thị
+                throw new Error(`HTTP ${response.status}`);
             }
+            return await response.json();
+        } catch (error) {
+            clearTimeout(id);
+            throw error;
         }
-        async function fetchWithTimeout(url, timeout = 5000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
+    }
+    
+    async function loadScripts(search = '', page = 1) {
+        const container = document.getElementById('scriptsContainer');
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><h3>Loading scripts...</h3></div>';
+        
+        try {
+            const scriptType = document.getElementById('scriptType').value;
+            const sortBy = document.getElementById('sortBy').value;
+            const maxResults = document.getElementById('maxResults').value;
+            
+            let apiUrl = new URL('https://scriptblox.com/api/script/fetch');
+            if (search) {
+                apiUrl = new URL('https://scriptblox.com/api/script/search');
+                apiUrl.searchParams.append('q', search);
+            }
+            apiUrl.searchParams.append('page', page);
+            apiUrl.searchParams.append('max', maxResults);
+            if (scriptType) apiUrl.searchParams.append('mode', scriptType);
+            if (sortBy) apiUrl.searchParams.append('sortBy', sortBy);
+            
+            const finalApiUrl = apiUrl.toString();
+            let data;
+            let success = false;
+            let lastError = null;
+
+            // 1. Thử kết nối trực tiếp
             try {
-                const response = await fetch(url, { signal: controller.signal });
-                clearTimeout(id);
-                if (!response.ok) {
-                    throw new Error(`HTTP error ${response.status}`);
-                }
-                return await response.json();
+                data = await fetchWithTimeout(finalApiUrl, 5000);
+                success = true;
             } catch (error) {
-                clearTimeout(id);
-                throw error;
+                lastError = error;
+                console.log(`Direct fetch failed: ${error.message}. Trying proxies...`);
             }
-        }
-        async function loadScripts(search = '', page = 1) {
-            const container = document.getElementById('scriptsContainer');
-            container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><h3>Loading scripts...</h3></div>';
-            try {
-                const scriptType = document.getElementById('scriptType').value;
-                const sortBy = document.getElementById('sortBy').value;
-                const maxResults = document.getElementById('maxResults').value;
-                let apiUrl = new URL('https://scriptblox.com/api/script/fetch');
-                if (search) {
-                    apiUrl = new URL('https://scriptblox.com/api/script/search');
-                    apiUrl.searchParams.append('q', search);
-                }
-                apiUrl.searchParams.append('page', page);
-                apiUrl.searchParams.append('max', maxResults);
-                if (scriptType) apiUrl.searchParams.append('mode', scriptType);
-                if (sortBy) apiUrl.searchParams.append('sortBy', sortBy);
-                let data;
-                try {
-                    data = await fetchWithTimeout(apiUrl.toString(), 7000);
-                } catch (directError) {
-                    console.log('Direct fetch failed, trying proxy...');
-                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(apiUrl.toString());
-                    data = await fetchWithTimeout(proxyUrl, 7000);
-                }
-                if (data && data.result && data.result.scripts) {
-                    scriptsData = data.result.scripts;
-                    totalPages = data.result.totalPages || 1;
-                } else if (data && Array.isArray(data)) {
-                    scriptsData = data;
-                    totalPages = 1;
-                } else {
-                    scriptsData = [];
-                    totalPages = 1;
-                }
-                currentPage = page;
-                renderScripts();
-            } catch (error) {
-                console.error('Error fetching scripts:', error);
-                showMessage(`Error: ${error.message}`);
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Failed to load scripts</h3>
-                        <p>We couldn't connect to the server. Please check your internet connection and try again.</p>
-                    </div>
-                `;
-            }
-        }
-        function renderScripts() {
-            const container = document.getElementById('scriptsContainer');
-            if (scriptsData.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-search"></i>
-                        <h3>No scripts found</h3>
-                        <p>Try adjusting your search or filters to find what you're looking for.</p>
-                    </div>
-                `;
-                return;
-            }
-            let html = '';
-            scriptsData.forEach((script, index) => {
-                const raw = script.image;
-                const imageUrl = raw
-                    ? (raw.startsWith('http') ? raw : `https://scriptblox.com${raw}`)
-                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc=';
-                html += `
-                    <div class="script-card" style="animation-delay: ${index * 0.05}s" data-index="${index}">
-                        ${script.paid ? '<span class="script-badge">Premium</span>' : ''}
-                        <div class="script-image-container">
-                            <img
-                                src="${imageUrl}"
-                                class="script-image"
-                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+SW1hZ2UgRXJyb3I8L3RleHQ+PC9zdmc='"
-                            >
-                        </div>
-                        <div class="script-content">
-                            <h3 class="script-title" title="${script.title}">${script.title}</h3>
-                            <p class="script-info">
-                                <i class="fas fa-gamepad"></i>
-                                ${script.game?.name || 'No game specified'}
-                            </p>
-                            <div class="script-stats">
-                                <div class="stat-item">
-                                    <i class="fas fa-eye"></i>
-                                    <span>${script.views?.toLocaleString() || 'N/A'}</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-thumbs-up"></i>
-                                    <span>${script.likeCount?.toLocaleString() || 'N/A'}</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    <span>${script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'N/A'}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-            document.querySelectorAll('.script-card').forEach(card => {
-                card.addEventListener('click', (e) => {
-                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-                    const index = card.dataset.index;
-                    openScriptModal(index);
-                });
-            });
-        }
-        function openScriptModal(index, isLocal = false) {
-            let script;
-            if (isLocal) {
-                const scripts = getLocalScripts();
-                script = scripts[index];
-                currentScript = {...script, isLocal: true, localIndex: index};
-            } else {
-                script = scriptsData[index];
-                currentScript = {...script, isLocal: false, index: index};
-            }
-            if (!script) return;
-            const modal = document.getElementById('scriptModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalScriptContent');
-            const saveScriptBtn = document.getElementById('saveScriptBtn');
-            modalTitle.textContent = script.title;
-            // Đảm bảo hiển thị thuộc tính script
-            modalContent.textContent = script.script || 'No script content available'; 
-            const scripts = getLocalScripts();
-            // Kiểm tra script hiện tại với các thuộc tính cần thiết
-            const isSaved = scripts.some(s => s.title === script.title && s.script === script.script); 
-            if (isSaved) {
-                saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
-                saveScriptBtn.classList.add('btn-success');
-                saveScriptBtn.classList.remove('btn-secondary');
-            } else {
-                saveScriptBtn.innerHTML = '<i class="fas fa-bookmark"></i> Save Script';
-                saveScriptBtn.classList.remove('btn-success'); // Đảm bảo lớp success bị xóa
-                saveScriptBtn.classList.add('btn-secondary');
-            }
-            modal.classList.add('active');
-        }
-        function showMessage(message) {
-            const notification = document.getElementById('notification');
-            notification.querySelector('span').textContent = message;
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('searchInput');
-            const scriptType = document.getElementById('scriptType');
-            const sortBy = document.getElementById('sortBy');
-            const maxResults = document.getElementById('maxResults');
-            const modal = document.getElementById('scriptModal');
-            const modalClose = document.getElementById('modalClose');
-            const modalCopyButton = document.getElementById('modalCopyButton');
-            const saveScriptBtn = document.getElementById('saveScriptBtn');
-            const tabs = document.querySelectorAll('.tab');
-            searchInput.addEventListener('input', () => {
-                setTimeout(() => loadScripts(searchInput.value), 500);
-            });
-            scriptType.addEventListener('change', () => loadScripts(searchInput.value));
-            sortBy.addEventListener('change', () => loadScripts(searchInput.value));
-            maxResults.addEventListener('change', () => loadScripts(searchInput.value));
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
-            });
-            modalClose.addEventListener('click', () => {
-                modal.classList.remove('active');
-            });
-            window.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-            modalCopyButton.addEventListener('click', () => {
-                if (currentScript && currentScript.script) {
-                    navigator.clipboard.writeText(currentScript.script)
-                        .then(() => showMessage('Script copied!'))
-                        .catch(err => console.error('Could not copy text: ', err));
-                }
-            });
-            saveScriptBtn.addEventListener('click', () => {
-                if (currentScript) {
-                    const success = saveLocalScript(currentScript);
-                    if (success) {
-                        showMessage('Script saved successfully!');
-                        saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
-                        saveScriptBtn.classList.add('btn-success');
-                        saveScriptBtn.classList.remove('btn-secondary');
-                    } else {
-                        showMessage('Script is already in your collection.');
+
+            // 2. Thử từng Proxy CORS nếu kết nối trực tiếp thất bại
+            if (!success) {
+                for (const proxyBaseUrl of PROXIES) {
+                    try {
+                        const proxyUrl = proxyBaseUrl + encodeURIComponent(finalApiUrl);
+                        // Tăng timeout cho proxy vì chúng chậm hơn
+                        data = await fetchWithTimeout(proxyUrl, 10000); 
+                        success = true;
+                        break; // Thành công, thoát khỏi vòng lặp proxy
+                    } catch (error) {
+                        lastError = error;
+                        console.log(`Proxy ${proxyBaseUrl} failed: ${error.message}.`);
                     }
                 }
-            });
-            // LOGIC EXECUTE ĐÃ ĐƯỢC XÓA THEO YÊU CẦU
+            }
+
+            if (!success) {
+                throw new Error(`All connection methods failed. Last error: ${lastError ? lastError.message : 'Unknown error'}`);
+            }
+
+            // Xử lý dữ liệu nhận được
+            if (data && data.result && data.result.scripts) {
+                scriptsData = data.result.scripts;
+                totalPages = data.result.totalPages || 1;
+            } else if (data && Array.isArray(data)) {
+                scriptsData = data;
+                totalPages = 1;
+            } else {
+                scriptsData = [];
+                totalPages = 1;
+            }
+            currentPage = page;
+            renderScripts();
             
-            loadScripts();
+        } catch (error) {
+            console.error('Error fetching scripts:', error);
+            showMessage(`Connection Error: ${error.message}`);
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Failed to load scripts</h3>
+                    <p>We couldn't connect to the server (CORS/Proxy error). Please check your internet connection or try refreshing.</p>
+                    <p style="font-size: 0.7rem; margin-top: 10px;">Details: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+    
+    function renderScripts() {
+        const container = document.getElementById('scriptsContainer');
+        if (scriptsData.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h3>No scripts found</h3>
+                    <p>Try adjusting your search or filters to find what you're looking for.</p>
+                </div>
+            `;
+            return;
+        }
+        let html = '';
+        scriptsData.forEach((script, index) => {
+            const raw = script.image;
+            const imageUrl = raw
+                ? (raw.startsWith('http') ? raw : `https://scriptblox.com${raw}`)
+                : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc=';
+            html += `
+                <div class="script-card" style="animation-delay: ${index * 0.05}s" data-index="${index}">
+                    ${script.paid ? '<span class="script-badge">Premium</span>' : ''}
+                    <div class="script-image-container">
+                        <img
+                            src="${imageUrl}"
+                            class="script-image"
+                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+SW1hZ2UgRXJyb3I8L3RleHQ+PC9zdmc='"
+                        >
+                    </div>
+                    <div class="script-content">
+                        <h3 class="script-title" title="${script.title}">${script.title}</h3>
+                        <p class="script-info">
+                            <i class="fas fa-gamepad"></i>
+                            ${script.game?.name || 'No game specified'}
+                        </p>
+                        <div class="script-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-eye"></i>
+                                <span>${script.views?.toLocaleString() || 'N/A'}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>${script.likeCount?.toLocaleString() || 'N/A'}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>${script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         });
-        function handleLocalCopy(event) {
-            const button = event.currentTarget;
-            const index = button.dataset.index;
+        container.innerHTML = html;
+        document.querySelectorAll('.script-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                const index = card.dataset.index;
+                openScriptModal(index);
+            });
+        });
+    }
+    
+    function openScriptModal(index, isLocal = false) {
+        let script;
+        if (isLocal) {
             const scripts = getLocalScripts();
-            const script = scripts[index];
-            if (script && script.script) {
-                navigator.clipboard.writeText(script.script)
+            script = scripts[index];
+            currentScript = {...script, isLocal: true, localIndex: index};
+        } else {
+            script = scriptsData[index];
+            currentScript = {...script, isLocal: false, index: index};
+        }
+        if (!script) return;
+        const modal = document.getElementById('scriptModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalScriptContent');
+        const saveScriptBtn = document.getElementById('saveScriptBtn');
+        modalTitle.textContent = script.title;
+        modalContent.textContent = script.script || 'No script content available'; 
+        const scripts = getLocalScripts();
+        const isSaved = scripts.some(s => s.title === script.title && s.script === script.script); 
+        if (isSaved) {
+            saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+            saveScriptBtn.classList.add('btn-success');
+            saveScriptBtn.classList.remove('btn-secondary');
+        } else {
+            saveScriptBtn.innerHTML = '<i class="fas fa-bookmark"></i> Save Script';
+            saveScriptBtn.classList.remove('btn-success');
+            saveScriptBtn.classList.add('btn-secondary');
+        }
+        modal.classList.add('active');
+    }
+    
+    function showMessage(message) {
+        const notification = document.getElementById('notification');
+        // Đặt lại animation để thông báo có thể xuất hiện lại ngay lập tức
+        notification.style.animation = 'none';
+        notification.offsetHeight; /* Trigger reflow */
+        notification.style.animation = null; 
+
+        notification.querySelector('span').textContent = message;
+        notification.style.display = 'block';
+        
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('searchInput');
+        const scriptType = document.getElementById('scriptType');
+        const sortBy = document.getElementById('sortBy');
+        const maxResults = document.getElementById('maxResults');
+        const modal = document.getElementById('scriptModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalCopyButton = document.getElementById('modalCopyButton');
+        const saveScriptBtn = document.getElementById('saveScriptBtn');
+        const tabs = document.querySelectorAll('.tab');
+        
+        searchInput.addEventListener('input', () => {
+            // Dùng setTimeout để giảm số lần gọi API khi người dùng gõ
+            clearTimeout(searchInput.timer);
+            searchInput.timer = setTimeout(() => loadScripts(searchInput.value), 700);
+        });
+        
+        scriptType.addEventListener('change', () => loadScripts(searchInput.value));
+        sortBy.addEventListener('change', () => loadScripts(searchInput.value));
+        maxResults.addEventListener('change', () => loadScripts(searchInput.value));
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+        });
+        
+        modalClose.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+        
+        modalCopyButton.addEventListener('click', () => {
+            if (currentScript && currentScript.script) {
+                navigator.clipboard.writeText(currentScript.script)
                     .then(() => showMessage('Script copied!'))
                     .catch(err => console.error('Could not copy text: ', err));
             }
+        });
+        
+        saveScriptBtn.addEventListener('click', () => {
+            if (currentScript) {
+                const success = saveLocalScript(currentScript);
+                if (success) {
+                    showMessage('Script saved successfully!');
+                    saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+                    saveScriptBtn.classList.add('btn-success');
+                    saveScriptBtn.classList.remove('btn-secondary');
+                } else {
+                    showMessage('Script is already in your collection.');
+                }
+            }
+        });
+        
+        loadScripts();
+    });
+    
+    function handleLocalCopy(event) {
+        const button = event.currentTarget;
+        const index = button.dataset.index;
+        const scripts = getLocalScripts();
+        const script = scripts[index];
+        if (script && script.script) {
+            navigator.clipboard.writeText(script.script)
+                .then(() => showMessage('Script copied!'))
+                .catch(err => console.error('Could not copy text: ', err));
         }
+    }
     </script>
 </body>
 </html>
