@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/api/scriptblox-proxy",
-      "destination": "https://scriptblox.com/api/script/search"
-    }
-  ]
-}
