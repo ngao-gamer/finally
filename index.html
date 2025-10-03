@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>.</title>
+    <title>ScriptBlox Searcher</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -329,7 +329,7 @@
             padding: 10px 15px;
             border-top: 1px solid var(--border);
             display: flex;
-            justify-content: flex-end; /* Căn chỉnh nút Save và Copy sang phải */
+            justify-content: flex-end;
             gap: 8px;
             background: linear-gradient(to right, rgba(30, 30, 30, 0.9), rgba(25, 25, 25, 0.95));
         }
@@ -527,13 +527,12 @@
         let totalPages = 1;
         let currentScriptIndex = -1;
         let currentScript = null;
-        const proxies = [
-            'https://corsproxy.io/?',
-            'https://api.codetabs.com/v1/proxy/?quest=',
-            'https://thingproxy.freeboard.io/fetch/',
-        ];
-        let currentProxy = 0;
+        
+        // SỬ DỤNG SERVERLESS PROXY FUNCTION TRÊN VERCEL
+        const BASE_API_PROXY = '/api/scriptblox-proxy'; 
+        
         let currentTab = 'cloud';
+        
         function getLocalScripts() {
             const scripts = localStorage.getItem('savedScripts');
             return scripts ? JSON.parse(scripts) : [];
@@ -541,12 +540,11 @@
         function saveLocalScript(script) {
             const scripts = getLocalScripts();
             
-            // Tối ưu hóa: Chỉ lưu các thuộc tính chuỗi cần thiết để tránh lỗi [object Object]
             const scriptToSave = {
                 title: script.title || 'Untitled',
                 script: script.script || '',
                 image: script.image || null,
-                game: script.game?.name || script.game || null, // Xử lý game name nếu có
+                game: script.game?.name || script.game || null, 
                 date: script.updatedAt || new Date().toISOString()
             };
 
@@ -579,7 +577,6 @@
             }
             let html = '';
             scripts.forEach((script, index) => {
-                // Đảm bảo script.game được hiển thị dưới dạng chuỗi
                 const gameName = script.game && typeof script.game === 'object' ? script.game.name : script.game || 'No game specified';
                 
                 html += `
@@ -591,7 +588,7 @@
                             <img
                                 src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc='}"
                                 class="script-image"
-                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
+                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+SW1hZ2UgRXJyb3I8L3RleHQ+PC9zdmc+'"
                             >
                         </div>
                         <div class="script-content">
@@ -630,7 +627,6 @@
                 card.addEventListener('click', (e) => {
                     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
                     const index = Array.from(card.parentElement.children).indexOf(card);
-                    // Mở modal để xem chi tiết
                     openScriptModal(index, true); 
                 });
             });
@@ -647,14 +643,26 @@
                 renderLocalScripts();
             }
         }
-        async function fetchWithTimeout(url, timeout = 5000) {
+        async function fetchWithTimeout(url, timeout = 10000) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
             try {
                 const response = await fetch(url, { signal: controller.signal });
                 clearTimeout(id);
+                // Cải tiến: Nếu lỗi 404, thông báo chính xác là proxy file bị thiếu
+                if (response.status === 404 && url.includes(BASE_API_PROXY)) {
+                    throw new Error("HTTP Error: 404 (Proxy File Missing). Vui lòng tạo lại file api/scriptblox-proxy.js");
+                }
                 if (!response.ok) {
-                    throw new Error(`HTTP error ${response.status}`);
+                    let errorMessage = `HTTP Error: ${response.status} ${response.statusText}`;
+                    try {
+                        // Thử đọc chi tiết lỗi từ proxy
+                        const errorBody = await response.json();
+                        if (errorBody.error) errorMessage += ` (Detail: ${errorBody.details})`;
+                    } catch (e) { 
+                        // Nếu không phải JSON, lỗi thường là do Vercel/Proxy, không phải lỗi từ API gốc
+                    }
+                    throw new Error(errorMessage);
                 }
                 return await response.json();
             } catch (error) {
@@ -662,54 +670,63 @@
                 throw error;
             }
         }
+        
         async function loadScripts(search = '', page = 1) {
             const container = document.getElementById('scriptsContainer');
             container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><h3>Loading scripts...</h3></div>';
+            
             try {
                 const scriptType = document.getElementById('scriptType').value;
                 const sortBy = document.getElementById('sortBy').value;
                 const maxResults = document.getElementById('maxResults').value;
-                let apiUrl = new URL('https://scriptblox.com/api/script/fetch');
-                if (search) {
-                    apiUrl = new URL('https://scriptblox.com/api/script/search');
-                    apiUrl.searchParams.append('q', search);
-                }
-                apiUrl.searchParams.append('page', page);
-                apiUrl.searchParams.append('max', maxResults);
-                if (scriptType) apiUrl.searchParams.append('mode', scriptType);
-                if (sortBy) apiUrl.searchParams.append('sortBy', sortBy);
-                let data;
-                try {
-                    data = await fetchWithTimeout(apiUrl.toString(), 7000);
-                } catch (directError) {
-                    console.log('Direct fetch failed, trying proxy...');
-                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(apiUrl.toString());
-                    data = await fetchWithTimeout(proxyUrl, 7000);
-                }
-                if (data && data.result && data.result.scripts) {
-                    scriptsData = data.result.scripts;
-                    totalPages = data.result.totalPages || 1;
-                } else if (data && Array.isArray(data)) {
+                
+                // 1. Tạo query string để gửi lên Proxy
+                let queryParams = new URLSearchParams();
+                queryParams.append('q', search.trim()); 
+                queryParams.append('page', page);
+                queryParams.append('max', maxResults);
+                
+                if (scriptType === 'paid') queryParams.append('paid', 'true');
+                if (scriptType === 'free') queryParams.append('paid', 'false');
+                if (sortBy) queryParams.append('sortBy', sortBy);
+                
+                // Dùng đường dẫn Proxy
+                const finalFetchUrl = `${BASE_API_PROXY}?${queryParams.toString()}`;
+
+                const data = await fetchWithTimeout(finalFetchUrl, 10000); 
+                
+                scriptsData = [];
+                totalPages = 1;
+                let finalResult = data.result || data.data || data; 
+
+                if (finalResult && typeof finalResult === 'object') {
+                    if (Array.isArray(finalResult.scripts)) {
+                        scriptsData = finalResult.scripts;
+                        totalPages = finalResult.totalPages || 1;
+                    } else if (Array.isArray(finalResult)) {
+                        scriptsData = finalResult;
+                    }
+                } else if (Array.isArray(data)) {
                     scriptsData = data;
-                    totalPages = 1;
-                } else {
-                    scriptsData = [];
-                    totalPages = 1;
                 }
+                
                 currentPage = page;
                 renderScripts();
+                
             } catch (error) {
                 console.error('Error fetching scripts:', error);
-                showMessage(`Error: ${error.message}`);
+                // Hiển thị chi tiết lỗi Proxy
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Failed to load scripts</h3>
-                        <p>We couldn't connect to the server. Please check your internet connection and try again.</p>
+                        <h3>PROXY ERROR: Cannot Connect</h3>
+                        <p>Ứng dụng không thể kết nối đến Proxy <code>/api/scriptblox-proxy</code>.</p>
+                        <p style="font-size: 0.7rem; margin-top: 10px;">Chi tiết: ${error.message}</p>
                     </div>
                 `;
             }
         }
+        
         function renderScripts() {
             const container = document.getElementById('scriptsContainer');
             if (scriptsData.length === 0) {
@@ -717,7 +734,7 @@
                     <div class="empty-state">
                         <i class="fas fa-search"></i>
                         <h3>No scripts found</h3>
-                        <p>Try adjusting your search or filters to find what you're looking for.</p>
+                        <p>Thử điều chỉnh tìm kiếm hoặc bộ lọc.</p>
                     </div>
                 `;
                 return;
@@ -727,7 +744,7 @@
                 const raw = script.image;
                 const imageUrl = raw
                     ? (raw.startsWith('http') ? raw : `https://scriptblox.com${raw}`)
-                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc=';
+                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
                 html += `
                     <div class="script-card" style="animation-delay: ${index * 0.05}s" data-index="${index}">
                         ${script.paid ? '<span class="script-badge">Premium</span>' : ''}
@@ -735,7 +752,7 @@
                             <img
                                 src="${imageUrl}"
                                 class="script-image"
-                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+SW1hZ2UgRXJyb3I8L3RleHQ+PC9zdmc='"
+                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
                             >
                         </div>
                         <div class="script-content">
@@ -787,10 +804,8 @@
             const modalContent = document.getElementById('modalScriptContent');
             const saveScriptBtn = document.getElementById('saveScriptBtn');
             modalTitle.textContent = script.title;
-            // Đảm bảo hiển thị thuộc tính script
             modalContent.textContent = script.script || 'No script content available'; 
             const scripts = getLocalScripts();
-            // Kiểm tra script hiện tại với các thuộc tính cần thiết
             const isSaved = scripts.some(s => s.title === script.title && s.script === script.script); 
             if (isSaved) {
                 saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
@@ -798,18 +813,34 @@
                 saveScriptBtn.classList.remove('btn-secondary');
             } else {
                 saveScriptBtn.innerHTML = '<i class="fas fa-bookmark"></i> Save Script';
-                saveScriptBtn.classList.remove('btn-success'); // Đảm bảo lớp success bị xóa
+                saveScriptBtn.classList.remove('btn-success'); 
                 saveScriptBtn.classList.add('btn-secondary');
             }
             modal.classList.add('active');
         }
         function showMessage(message) {
             const notification = document.getElementById('notification');
+            notification.style.animation = 'none';
+            notification.offsetHeight; 
+            notification.style.animation = null; 
+
             notification.querySelector('span').textContent = message;
             notification.style.display = 'block';
+            
             setTimeout(() => {
                 notification.style.display = 'none';
             }, 3000);
+        }
+        function handleLocalCopy(event) {
+            const button = event.currentTarget;
+            const index = button.dataset.index;
+            const scripts = getLocalScripts();
+            const script = scripts[index];
+            if (script && script.script) {
+                navigator.clipboard.writeText(script.script)
+                    .then(() => showMessage('Script copied!'))
+                    .catch(err => console.error('Could not copy text: ', err));
+            }
         }
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('searchInput');
@@ -821,23 +852,30 @@
             const modalCopyButton = document.getElementById('modalCopyButton');
             const saveScriptBtn = document.getElementById('saveScriptBtn');
             const tabs = document.querySelectorAll('.tab');
+            
             searchInput.addEventListener('input', () => {
-                setTimeout(() => loadScripts(searchInput.value), 500);
+                clearTimeout(searchInput.timer);
+                searchInput.timer = setTimeout(() => loadScripts(searchInput.value), 700);
             });
+            
             scriptType.addEventListener('change', () => loadScripts(searchInput.value));
             sortBy.addEventListener('change', () => loadScripts(searchInput.value));
             maxResults.addEventListener('change', () => loadScripts(searchInput.value));
+            
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => switchTab(tab.dataset.tab));
             });
+            
             modalClose.addEventListener('click', () => {
                 modal.classList.remove('active');
             });
+            
             window.addEventListener('click', (event) => {
                 if (event.target === modal) {
                     modal.classList.remove('active');
                 }
             });
+            
             modalCopyButton.addEventListener('click', () => {
                 if (currentScript && currentScript.script) {
                     navigator.clipboard.writeText(currentScript.script)
@@ -845,6 +883,7 @@
                         .catch(err => console.error('Could not copy text: ', err));
                 }
             });
+            
             saveScriptBtn.addEventListener('click', () => {
                 if (currentScript) {
                     const success = saveLocalScript(currentScript);
@@ -858,21 +897,9 @@
                     }
                 }
             });
-            // LOGIC EXECUTE ĐÃ ĐƯỢC XÓA THEO YÊU CẦU
             
             loadScripts();
         });
-        function handleLocalCopy(event) {
-            const button = event.currentTarget;
-            const index = button.dataset.index;
-            const scripts = getLocalScripts();
-            const script = scripts[index];
-            if (script && script.script) {
-                navigator.clipboard.writeText(script.script)
-                    .then(() => showMessage('Script copied!'))
-                    .catch(err => console.error('Could not copy text: ', err));
-            }
-        }
     </script>
 </body>
 </html>
