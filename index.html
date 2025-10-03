@@ -522,7 +522,7 @@
         <span>Script copied!</span>
     </div>
     <script>
-     let scriptsData = [];
+    let scriptsData = [];
     let currentPage = 1;
     let totalPages = 1;
     let currentScriptIndex = -1;
@@ -532,7 +532,7 @@
     const PROXIES = [
         'https://corsproxy.io/?',
         'https://api.codetabs.com/v1/proxy/?quest=',
-        // Bạn có thể thêm các proxy khác ở đây nếu hai cái trên vẫn bị chặn
+        // Thêm các proxy khác nếu hai cái trên vẫn bị chặn
     ];
     let currentTab = 'cloud';
     
@@ -548,7 +548,6 @@
     function saveLocalScript(script) {
         const scripts = getLocalScripts();
         
-        // Tối ưu hóa: Chỉ lưu các thuộc tính chuỗi cần thiết
         const scriptToSave = {
             title: script.title || 'Untitled',
             script: script.script || '',
@@ -599,7 +598,7 @@
                         <img
                             src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc='}"
                             class="script-image"
-                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
+                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4';"
                         >
                     </div>
                     <div class="script-content">
@@ -657,7 +656,7 @@
     }
 
     // ===================================
-    // API FETCHING LOGIC (SỬA LỖI KẾT NỐI)
+    // API FETCHING LOGIC (SỬA LỖI KẾT NỐI VÀ DỮ LIỆU)
     // ===================================
     
     async function fetchWithTimeout(url, timeout = 7000) {
@@ -686,10 +685,10 @@
             const sortBy = document.getElementById('sortBy').value;
             const maxResults = document.getElementById('maxResults').value;
             
-            // SỬA LỖI: LUÔN DÙNG ENDPOINT SEARCH VÀ THAM SỐ Q RỖNG KHI KHÔNG TÌM KIẾM
+            // LUÔN DÙNG ENDPOINT SEARCH VÀ THAM SỐ Q RỖNG KHI KHÔNG TÌM KIẾM
             let apiUrl = new URL('https://scriptblox.com/api/script/search');
             
-            apiUrl.searchParams.append('q', search.trim()); // Dùng q='' khi search rỗng
+            apiUrl.searchParams.append('q', search.trim()); 
             
             apiUrl.searchParams.append('page', page);
             apiUrl.searchParams.append('max', maxResults);
@@ -729,17 +728,30 @@
                 throw new Error(`All connection methods failed. Last error: ${lastError ? lastError.message : 'Connection Refused'}`);
             }
 
-            // Xử lý dữ liệu nhận được
-            if (data && data.result && data.result.scripts) {
-                scriptsData = data.result.scripts;
-                totalPages = data.result.totalPages || 1;
-            } else if (data && Array.isArray(data)) {
-                scriptsData = data;
-                totalPages = 1;
-            } else {
-                scriptsData = [];
-                totalPages = 1;
+            // === BẢN VÁ GẤP: XỬ LÝ CẤU TRÚC DỮ LIỆU ĐÃ THAY ĐỔI ===
+            
+            scriptsData = [];
+            totalPages = 1;
+
+            if (data) {
+                if (data.result && Array.isArray(data.result.scripts)) {
+                    // Cấu trúc chuẩn khi search thành công
+                    scriptsData = data.result.scripts;
+                    totalPages = data.result.totalPages || 1;
+                } else if (data.data && Array.isArray(data.data.scripts)) {
+                    // Xử lý cấu trúc dữ liệu có thể đã thay đổi (data.data)
+                    scriptsData = data.data.scripts;
+                    totalPages = data.data.totalPages || 1;
+                } else if (Array.isArray(data.scripts)) {
+                     // Xử lý cấu trúc mảng nằm ngay ngoài cùng
+                    scriptsData = data.scripts;
+                    totalPages = data.totalPages || 1;
+                } else if (Array.isArray(data)) {
+                     // Cấu trúc mảng đơn giản (ít gặp nhưng vẫn nên xử lý)
+                    scriptsData = data;
+                }
             }
+            
             currentPage = page;
             renderScripts();
             
@@ -751,7 +763,7 @@
                     <i class="fas fa-exclamation-triangle"></i>
                     <h3>Failed to load scripts</h3>
                     <p>We couldn't connect to the server (CORS/Proxy error). Please check your internet connection or try refreshing.</p>
-                    <p style="font-size: 0.7rem; margin-top: 10px;">Details: ${error.message}</p>
+                    <p style="font-size: 0.7rem; margin-top: 10px;">Chi tiết: ${error.message}</p>
                 </div>
             `;
         }
