@@ -2,6 +2,7 @@
 
 module.exports = async (req, res) => {
     
+    // URL API GỐC (ĐÃ XÁC NHẬN CHÍNH XÁC)
     const BASE_API_URL = 'https://scriptblox.com/api/script/search';
 
     const { url } = req;
@@ -9,7 +10,7 @@ module.exports = async (req, res) => {
     // Xử lý tham số tìm kiếm
     let queryParams = new URLSearchParams(url.split('?')[1] || '');
 
-    // ĐẢM BẢO LUÔN CÓ THAM SỐ 'q' (QUERY) VỚI GIÁ TRỊ RỖNG
+    // ĐẢM BẢO LUÔN CÓ THAM SỐ 'q' (QUERY)
     if (!queryParams.has('q')) {
         queryParams.set('q', '');
     }
@@ -27,7 +28,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // GỌI API GỐC VỚI HEADER MẠNH MẼ
+        // GỌI API GỐC VỚI HEADER MẠNH MẼ VÀ HOST HEADER MỚI
         const response = await fetch(targetUrl, {
             headers: {
                 'Host': 'scriptblox.com', 
@@ -47,7 +48,7 @@ module.exports = async (req, res) => {
             
             res.status(500).json({ 
                 error: `Upstream API Failed: ${response.status} ${response.statusText}`, 
-                details: "API gốc đã từ chối yêu cầu. Có thể API đang bảo trì hoặc đã đổi cơ chế bảo mật.",
+                details: "API gốc đã từ chối yêu cầu. Rất có thể ScriptBlox đã áp dụng Cloudflare hoặc các biện pháp bảo mật mạnh.",
                 upstream_response_snippet: errorBodyText.substring(0, 200) + '...' 
             });
             return;
