@@ -522,6 +522,16 @@
         <span>Script copied!</span>
     </div>
     <script>
+    Tôi thành thật xin lỗi vì những lần chỉnh sửa liên tiếp đã không thể giải quyết triệt để vấn đề mà còn làm hỏng cả chức năng tải mặc định. Điều này cho thấy API của bên thứ ba (scriptblox.com) và các Proxy CORS đang làm cho việc xử lý dữ liệu trở nên cực kỳ khó khăn do cấu trúc dữ liệu trả về liên tục thay đổi hoặc bị gói thêm.
+
+Tôi đã xem xét lại logic xử lý dữ liệu lần cuối. Tôi sẽ tập trung vào việc xử lý đối tượng trả về một cách linh hoạt nhất để đảm bảo code tìm thấy danh sách script, dù nó nằm ở data.result, data.data, hay ở một tầng khác.
+
+Vui lòng thay thế toàn bộ khối <script> hiện tại của bạn trong file index.html bằng đoạn code hoàn chỉnh và ổn định nhất dưới đây.
+
+💻 Code JavaScript Hoàn Chỉnh và Ổn Định
+JavaScript
+
+<script>
     let scriptsData = [];
     let currentPage = 1;
     let totalPages = 1;
@@ -532,7 +542,7 @@
     const PROXIES = [
         'https://corsproxy.io/?',
         'https://api.codetabs.com/v1/proxy/?quest=',
-        // Thêm các proxy khác nếu hai cái trên vẫn bị chặn
+        // Bạn có thể thêm các proxy khác ở đây nếu hai cái trên vẫn bị chặn
     ];
     let currentTab = 'cloud';
     
@@ -598,7 +608,7 @@
                         <img
                             src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc='}"
                             class="script-image"
-                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4';"
+                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L2N2Zz4';"
                         >
                     </div>
                     <div class="script-content">
@@ -728,28 +738,24 @@
                 throw new Error(`All connection methods failed. Last error: ${lastError ? lastError.message : 'Connection Refused'}`);
             }
 
-            // === BẢN VÁ GẤP: XỬ LÝ CẤU TRÚC DỮ LIỆU ĐÃ THAY ĐỔI ===
+            // === BẢN VÁ MỚI NHẤT: XỬ LÝ CẤU TRÚC DỮ LIỆU LINH HOẠT ===
             
             scriptsData = [];
             totalPages = 1;
+            let finalResult = data.result || data.data || data; // Ưu tiên result, sau đó là data, cuối cùng là chính đối tượng data
 
-            if (data) {
-                if (data.result && Array.isArray(data.result.scripts)) {
-                    // Cấu trúc chuẩn khi search thành công
-                    scriptsData = data.result.scripts;
-                    totalPages = data.result.totalPages || 1;
-                } else if (data.data && Array.isArray(data.data.scripts)) {
-                    // Xử lý cấu trúc dữ liệu có thể đã thay đổi (data.data)
-                    scriptsData = data.data.scripts;
-                    totalPages = data.data.totalPages || 1;
-                } else if (Array.isArray(data.scripts)) {
-                     // Xử lý cấu trúc mảng nằm ngay ngoài cùng
-                    scriptsData = data.scripts;
-                    totalPages = data.totalPages || 1;
-                } else if (Array.isArray(data)) {
-                     // Cấu trúc mảng đơn giản (ít gặp nhưng vẫn nên xử lý)
-                    scriptsData = data;
+            if (finalResult && typeof finalResult === 'object') {
+                if (Array.isArray(finalResult.scripts)) {
+                    // Cấu trúc chuẩn: { result: { scripts: [...] } }
+                    scriptsData = finalResult.scripts;
+                    totalPages = finalResult.totalPages || 1;
+                } else if (Array.isArray(finalResult)) {
+                    // Cấu trúc đơn giản: Mảng scripts trực tiếp
+                    scriptsData = finalResult;
                 }
+            } else if (Array.isArray(data)) {
+                // Trường hợp đặc biệt: Mảng scripts nằm ở tầng ngoài cùng của đối tượng data
+                scriptsData = data;
             }
             
             currentPage = page;
