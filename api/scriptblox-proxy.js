@@ -23,13 +23,18 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // Gọi API gốc từ Server Vercel
-        const response = await fetch(targetUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 
-                'Accept': 'application/json',
-            }
-        });
+// Thay thế đoạn fetch hiện tại trong file api/scriptblox-proxy.js
+
+const response = await fetch(targetUrl, {
+    headers: {
+        // Tăng cường User-Agent để giả lập trình duyệt chi tiết hơn
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*', // Khai báo nhiều loại nội dung chấp nhận
+        'Referer': 'https://scriptblox.com/', // Bắt chước việc gọi từ trang chủ ScriptBlox
+        'Accept-Language': 'en-US,en;q=0.9,vi;q=0.8', // Thêm ngôn ngữ
+        'Connection': 'keep-alive', // Giữ kết nối
+    }
+});
         
         // Kiểm tra lỗi HTTP từ API gốc
         if (!response.ok) {
