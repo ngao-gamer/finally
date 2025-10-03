@@ -336,11 +336,16 @@
         let currentScriptIndex = -1;
         let currentScript = null;
         
-        // TEN CAC PROXY CORS DE KHAC PHUC LOI KET NOI
+        // TEN CAC PROXY CORS MOI DE KHAC PHUC LOI BI CHAN
         const PROXIES = [
-            'https://corsproxy.io/?',
-            'https://api.codetabs.com/v1/proxy/?quest=',
-            // Them cac proxy khac neu hai cai tren van bi chan
+            'https://corsproxy.io/?', // Bi chan
+            'https://api.codetabs.com/v1/proxy/?quest=', // Bi chan
+            'https://thingproxy.freeboard.io/fetch/', // PROXY MOI: Khá phổ biến
+            'https://api.allorigins.win/raw?url=', // PROXY MOI: Dễ sử dụng
+            'https://cors-anywhere.herokuapp.com/', // PROXY MOI: Phải click "Request Temporary Access" lần đầu
+            
+            // Nếu các proxy trên vẫn bị chặn, bạn có thể thử thêm: 
+            // 'https://yacdn.org/proxy/' 
         ];
         let currentTab = 'cloud';
         
@@ -521,8 +526,33 @@
                 if (!success) {
                     for (const proxyBaseUrl of PROXIES) {
                         try {
-                            const proxyUrl = proxyBaseUrl + encodeURIComponent(finalApiUrl);
+                            // API AllOrigins.win và Thingproxy sử dụng cấu trúc khác: encodeURIComponent(finalApiUrl)
+                            let proxyUrl = proxyBaseUrl;
+
+                            if (proxyBaseUrl.includes('api.allorigins.win')) {
+                                // AllOrigins.win yêu cầu encode URL
+                                proxyUrl = proxyBaseUrl + encodeURIComponent(finalApiUrl);
+                            } else if (proxyBaseUrl.includes('thingproxy.freeboard.io')) {
+                                // Thingproxy yêu cầu URL không cần encode
+                                proxyUrl = proxyBaseUrl + finalApiUrl;
+                            } else if (proxyBaseUrl.includes('corsproxy.io') || proxyBaseUrl.includes('codetabs.com') || proxyBaseUrl.includes('cors-anywhere.herokuapp.com')) {
+                                // Cac proxy khac yêu cầu encode URL
+                                proxyUrl = proxyBaseUrl + encodeURIComponent(finalApiUrl);
+                            }
+
                             data = await fetchWithTimeout(proxyUrl, 10000); 
+                            
+                            // Xử lý đối tượng trả về của AllOrigins.win nếu cần
+                            if (proxyBaseUrl.includes('api.allorigins.win') && data && data.contents) {
+                                try {
+                                    // Thử parse JSON từ trường 'contents'
+                                    data = JSON.parse(data.contents);
+                                } catch (e) {
+                                    // Nếu không phải JSON, dùng nội dung thô
+                                    console.log('AllOrigins response is not JSON, treating as raw content.');
+                                }
+                            }
+                            
                             success = true;
                             break; 
                         } catch (error) {
@@ -536,7 +566,7 @@
                     throw new Error(`All connection methods failed. Last error: ${lastError ? lastError.message : 'Connection Refused'}`);
                 }
 
-                // === BAN VA MOI NHAT: XU LY CAU TRUC DU LIEU LINH HOAT ===
+                // === XU LY CAU TRUC DU LIEU LINH HOAT ===
                 
                 scriptsData = [];
                 totalPages = 1;
