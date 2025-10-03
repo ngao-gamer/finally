@@ -2,12 +2,20 @@
 
 module.exports = async (req, res) => {
     
-    // URL API GỐC MỚI NHẤT của bạn (đã xác nhận)
+    // URL API GỐC MỚI NHẤT
     const BASE_API_URL = 'https://scriptblox.com/api/script/search';
 
     const { url } = req;
-    const query = url.split('?')[1] ? '?' + url.split('?')[1] : '';
-    const targetUrl = BASE_API_URL + query; 
+    
+    // 1. TẠO THAM SỐ TÌM KIẾM
+    let queryParams = new URLSearchParams(url.split('?')[1] || '');
+
+    // ĐẢM BẢO LUÔN CÓ THAM SỐ 'q' ĐƯỢC GỬI ĐI (để API gốc không trả về lỗi)
+    if (!queryParams.has('q')) {
+        queryParams.set('q', '');
+    }
+
+    const targetUrl = BASE_API_URL + '?' + queryParams.toString(); 
 
     // Thiết lập Header CORS
     res.setHeader('Access-Control-Allow-Origin', '*'); 
@@ -20,31 +28,27 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // GỌI API GỐC VỚI HEADER ĐƯỢC TĂNG CƯỜNG ĐỂ TRÁNH BỊ CHẶN
+        // GỌI API GỐC VỚI HEADER MẠNH MẼ ĐỂ CHỐNG BỊ CHẶN (LỖI 500)
         const response = await fetch(targetUrl, {
             headers: {
-                // Giả lập User-Agent của một trình duyệt Chrome hiện đại
+                // Giả lập trình duyệt chi tiết
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                // Chỉ ra rằng chúng ta chấp nhận JSON, Text và bất kỳ loại nội dung nào
                 'Accept': 'application/json, text/plain, */*', 
-                // Bắt chước việc request đến từ trang chủ ScriptBlox
-                'Referer': 'https://scriptblox.com/', 
-                // Thêm các header chuẩn của trình duyệt
+                'Referer': 'https://scriptblox.com/', // Bắt chước việc gọi từ trang chủ
                 'Accept-Language': 'en-US,en;q=0.9,vi;q=0.8', 
                 'Connection': 'keep-alive',
+                'Sec-Fetch-Dest': 'empty', // Thêm các header bảo mật của trình duyệt
+                'Sec-Fetch-Mode': 'cors',
             }
         });
         
-        // Kiểm tra lỗi HTTP từ API gốc. Nếu là 403/500/etc.
+        // Kiểm tra lỗi HTTP từ API gốc
         if (!response.ok) {
-            // Cố gắng lấy body lỗi từ API gốc (nếu có)
             let errorBodyText = await response.text();
             
-            // Trả về lỗi chi tiết
             res.status(500).json({ 
                 error: `Upstream API Failed: ${response.status} ${response.statusText}`, 
-                details: "API gốc đã từ chối yêu cầu. Đã thử dùng Header nâng cao.",
-                // Thêm 1 phần nhỏ body lỗi để debug (giới hạn 200 ký tự)
+                details: "API gốc đã từ chối yêu cầu. Có thể API đang bảo trì hoặc đã đổi cơ chế bảo mật (như Cloudflare/Captcha).",
                 upstream_response_snippet: errorBodyText.substring(0, 200) + '...' 
             });
             return;
