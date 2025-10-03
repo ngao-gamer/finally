@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>.</title>
+    <title>ScriptBlox Searcher</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -329,7 +329,7 @@
             padding: 10px 15px;
             border-top: 1px solid var(--border);
             display: flex;
-            justify-content: flex-end; /* Căn chỉnh nút Save và Copy sang phải */
+            justify-content: flex-end;
             gap: 8px;
             background: linear-gradient(to right, rgba(30, 30, 30, 0.9), rgba(25, 25, 25, 0.95));
         }
@@ -528,10 +528,7 @@
         let currentScriptIndex = -1;
         let currentScript = null;
         
-        // =================================================================================
         // SỬ DỤNG SERVERLESS PROXY FUNCTION TRÊN VERCEL
-        // Đây là cách ổn định nhất để tránh lỗi CORS và proxy công cộng.
-        // =================================================================================
         const BASE_API_PROXY = '/api/scriptblox-proxy'; 
         
         let currentTab = 'cloud';
@@ -655,6 +652,7 @@
                 if (!response.ok) {
                     let errorMessage = `HTTP Error: ${response.status} ${response.statusText}`;
                     try {
+                        // Thử đọc chi tiết lỗi từ proxy
                         const errorBody = await response.json();
                         if (errorBody.error) errorMessage += ` (Detail: ${errorBody.details})`;
                     } catch (e) { /* ignore if not json */ }
@@ -676,23 +674,19 @@
                 const sortBy = document.getElementById('sortBy').value;
                 const maxResults = document.getElementById('maxResults').value;
                 
-                // 1. Tạo query string để gửi lên Proxy (Proxy sẽ tự động thêm vào API gốc)
+                // 1. Tạo query string để gửi lên Proxy
                 let queryParams = new URLSearchParams();
                 queryParams.append('q', search.trim()); 
                 queryParams.append('page', page);
                 queryParams.append('max', maxResults);
                 
-                // Xử lý các filter (ScriptBlox API dùng 'paid' cho lọc free/paid)
                 if (scriptType === 'paid') queryParams.append('paid', 'true');
                 if (scriptType === 'free') queryParams.append('paid', 'false');
                 if (sortBy) queryParams.append('sortBy', sortBy);
                 
-                // 2. Tạo URL cuối cùng để fetch từ Proxy Backend Vercel
                 const finalFetchUrl = `${BASE_API_PROXY}?${queryParams.toString()}`;
 
-                // --- BƯỚC FETCH: Chỉ gọi đến Serverless Function của bạn ---
                 const data = await fetchWithTimeout(finalFetchUrl, 10000); 
-                // ----------------------------------------
                 
                 scriptsData = [];
                 totalPages = 1;
@@ -714,7 +708,7 @@
                 
             } catch (error) {
                 console.error('Error fetching scripts:', error);
-                showMessage(`Connection Error: Proxy failed. Chi tiết: ${error.message}`);
+                // Hiển thị chi tiết lỗi Proxy
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
@@ -726,8 +720,6 @@
             }
         }
         
-        // ... (phần còn lại của các hàm khác giữ nguyên) ...
-
         function renderScripts() {
             const container = document.getElementById('scriptsContainer');
             if (scriptsData.length === 0) {
@@ -745,7 +737,7 @@
                 const raw = script.image;
                 const imageUrl = raw
                     ? (raw.startsWith('http') ? raw : `https://scriptblox.com${raw}`)
-                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc=';
+                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
                 html += `
                     <div class="script-card" style="animation-delay: ${index * 0.05}s" data-index="${index}">
                         ${script.paid ? '<span class="script-badge">Premium</span>' : ''}
@@ -753,7 +745,7 @@
                             <img
                                 src="${imageUrl}"
                                 class="script-image"
-                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbm5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+SW1hZ2UgRXJyb3I8L3RleHQ+PC9zdmc='"
+                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
                             >
                         </div>
                         <div class="script-content">
