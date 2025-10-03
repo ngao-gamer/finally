@@ -522,20 +522,24 @@
         <span>Script copied!</span>
     </div>
     <script>
-    let scriptsData = [];
+     let scriptsData = [];
     let currentPage = 1;
     let totalPages = 1;
     let currentScriptIndex = -1;
     let currentScript = null;
     
-    // Tên của các proxy
+    // TÊN CÁC PROXY CORS ĐỂ KHẮC PHỤC LỖI KẾT NỐI
     const PROXIES = [
         'https://corsproxy.io/?',
         'https://api.codetabs.com/v1/proxy/?quest=',
-        // Thêm một proxy khác nếu cần
+        // Bạn có thể thêm các proxy khác ở đây nếu hai cái trên vẫn bị chặn
     ];
     let currentTab = 'cloud';
     
+    // ===================================
+    // LOCAL STORAGE FUNCTIONS
+    // ===================================
+
     function getLocalScripts() {
         const scripts = localStorage.getItem('savedScripts');
         return scripts ? JSON.parse(scripts) : [];
@@ -544,6 +548,7 @@
     function saveLocalScript(script) {
         const scripts = getLocalScripts();
         
+        // Tối ưu hóa: Chỉ lưu các thuộc tính chuỗi cần thiết
         const scriptToSave = {
             title: script.title || 'Untitled',
             script: script.script || '',
@@ -650,6 +655,10 @@
             renderLocalScripts();
         }
     }
+
+    // ===================================
+    // API FETCHING LOGIC (SỬA LỖI KẾT NỐI)
+    // ===================================
     
     async function fetchWithTimeout(url, timeout = 7000) {
         const controller = new AbortController();
@@ -658,8 +667,8 @@
             const response = await fetch(url, { signal: controller.signal });
             clearTimeout(id);
             if (!response.ok) {
-                // Rút ngắn lỗi để hiển thị
-                throw new Error(`HTTP ${response.status}`);
+                // Trả về lỗi chi tiết hơn nếu HTTP status không phải 200
+                throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
             }
             return await response.json();
         } catch (error) {
@@ -677,11 +686,11 @@
             const sortBy = document.getElementById('sortBy').value;
             const maxResults = document.getElementById('maxResults').value;
             
-            let apiUrl = new URL('https://scriptblox.com/api/script/fetch');
-            if (search) {
-                apiUrl = new URL('https://scriptblox.com/api/script/search');
-                apiUrl.searchParams.append('q', search);
-            }
+            // SỬA LỖI: LUÔN DÙNG ENDPOINT SEARCH VÀ THAM SỐ Q RỖNG KHI KHÔNG TÌM KIẾM
+            let apiUrl = new URL('https://scriptblox.com/api/script/search');
+            
+            apiUrl.searchParams.append('q', search.trim()); // Dùng q='' khi search rỗng
+            
             apiUrl.searchParams.append('page', page);
             apiUrl.searchParams.append('max', maxResults);
             if (scriptType) apiUrl.searchParams.append('mode', scriptType);
@@ -692,7 +701,7 @@
             let success = false;
             let lastError = null;
 
-            // 1. Thử kết nối trực tiếp
+            // 1. Thử kết nối trực tiếp (5 giây)
             try {
                 data = await fetchWithTimeout(finalApiUrl, 5000);
                 success = true;
@@ -701,15 +710,14 @@
                 console.log(`Direct fetch failed: ${error.message}. Trying proxies...`);
             }
 
-            // 2. Thử từng Proxy CORS nếu kết nối trực tiếp thất bại
+            // 2. Thử từng Proxy CORS (10 giây cho mỗi proxy)
             if (!success) {
                 for (const proxyBaseUrl of PROXIES) {
                     try {
                         const proxyUrl = proxyBaseUrl + encodeURIComponent(finalApiUrl);
-                        // Tăng timeout cho proxy vì chúng chậm hơn
                         data = await fetchWithTimeout(proxyUrl, 10000); 
                         success = true;
-                        break; // Thành công, thoát khỏi vòng lặp proxy
+                        break; 
                     } catch (error) {
                         lastError = error;
                         console.log(`Proxy ${proxyBaseUrl} failed: ${error.message}.`);
@@ -718,7 +726,7 @@
             }
 
             if (!success) {
-                throw new Error(`All connection methods failed. Last error: ${lastError ? lastError.message : 'Unknown error'}`);
+                throw new Error(`All connection methods failed. Last error: ${lastError ? lastError.message : 'Connection Refused'}`);
             }
 
             // Xử lý dữ liệu nhận được
@@ -749,6 +757,10 @@
         }
     }
     
+    // ===================================
+    // RENDER FUNCTIONS
+    // ===================================
+
     function renderScripts() {
         const container = document.getElementById('scriptsContainer');
         if (scriptsData.length === 0) {
@@ -810,7 +822,11 @@
             });
         });
     }
-    
+
+    // ===================================
+    // MODAL AND UI FUNCTIONS
+    // ===================================
+
     function openScriptModal(index, isLocal = false) {
         let script;
         if (isLocal) {
@@ -856,6 +872,22 @@
             notification.style.display = 'none';
         }, 3000);
     }
+
+    function handleLocalCopy(event) {
+        const button = event.currentTarget;
+        const index = button.dataset.index;
+        const scripts = getLocalScripts();
+        const script = scripts[index];
+        if (script && script.script) {
+            navigator.clipboard.writeText(script.script)
+                .then(() => showMessage('Script copied!'))
+                .catch(err => console.error('Could not copy text: ', err));
+        }
+    }
+    
+    // ===================================
+    // EVENT LISTENERS
+    // ===================================
     
     document.addEventListener('DOMContentLoaded', () => {
         const searchInput = document.getElementById('searchInput');
@@ -868,8 +900,8 @@
         const saveScriptBtn = document.getElementById('saveScriptBtn');
         const tabs = document.querySelectorAll('.tab');
         
+        // DEBOUNCE: Đợi 700ms sau khi người dùng ngừng gõ mới tìm kiếm
         searchInput.addEventListener('input', () => {
-            // Dùng setTimeout để giảm số lần gọi API khi người dùng gõ
             clearTimeout(searchInput.timer);
             searchInput.timer = setTimeout(() => loadScripts(searchInput.value), 700);
         });
@@ -914,20 +946,9 @@
             }
         });
         
+        // BẮT ĐẦU TẢI DỮ LIỆU KHI TRANG LOAD
         loadScripts();
     });
-    
-    function handleLocalCopy(event) {
-        const button = event.currentTarget;
-        const index = button.dataset.index;
-        const scripts = getLocalScripts();
-        const script = scripts[index];
-        if (script && script.script) {
-            navigator.clipboard.writeText(script.script)
-                .then(() => showMessage('Script copied!'))
-                .catch(err => console.error('Could not copy text: ', err));
-        }
-    }
     </script>
 </body>
 </html>
