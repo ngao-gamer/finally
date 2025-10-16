@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<!-- saved from url=(0048)https://purium-ai-peak.vercel.app/scripthub.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScriptBlox Searcher</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>.</title>
+    <link rel="stylesheet" href="./scripthub_files/all.min.css">
     <style>
         :root {
-            --bg-color: #202020;
-            --accent-color: white;
-            --accent-glow: rgba(255, 255, 255, 0.4);
+            --bg-color: #0a0a0a;
+            --accent-color: #5d9cec;
+            --accent-glow: rgba(93, 156, 236, 0.4);
             --card-bg: rgba(15, 15, 15, 0.7);
-            --text-color: rgba(255, 255, 255, 0.92);
+            --text-color: rgba(255, 255, 255, 0.95);
             --text-secondary: rgba(255, 255, 255, 0.7);
             --border: rgba(255, 255, 255, 0.15);
             --success: #4CAF50;
@@ -21,6 +21,7 @@
             --radius-lg: 12px;
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
+
         * {
             margin: 0;
             padding: 0;
@@ -28,6 +29,7 @@
             font-family: 'Segoe UI', monospace;
             transition: var(--transition);
         }
+
         body {
             color: var(--text-color);
             min-height: 100vh;
@@ -40,13 +42,16 @@
             width: 8px;
             background: transparent;
         }
+        
         ::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 4px;
         }
+        
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+
         .floating-search {
             position: sticky;
             top: 15px;
@@ -63,6 +68,7 @@
             align-items: center;
             background: linear-gradient(to right, rgba(30, 30, 30, 0.8), rgba(20, 20, 20, 0.9));
         }
+
         .search-input {
             flex: 1;
             padding: 8px 12px;
@@ -74,26 +80,31 @@
             outline: none;
             background: linear-gradient(to right, rgba(25, 25, 25, 0.7), rgba(20, 20, 20, 0.8));
         }
+
         .search-input:focus {
             border-color: var(--accent-color);
             box-shadow: 0 0 0 2px var(--accent-glow);
             background: linear-gradient(to right, rgba(35, 35, 35, 0.7), rgba(25, 25, 25, 0.8));
         }
+
         .filter-select {
             padding: 8px 10px;
             border: 1px solid var(--border);
+            background: rgba(30, 30, 30, 0.6);
             color: var(--text-color);
             border-radius: var(--radius-md);
             font-size: 0.85rem;
             outline: none;
             cursor: pointer;
-            background: rgba(25, 25, 25, 0.7);
+            background: linear-gradient(to bottom, rgba(25, 25, 25, 0.7), rgba(20, 20, 20, 0.8));
         }
+
         .filter-select:focus {
             border-color: var(--accent-color);
             box-shadow: 0 0 0 2px var(--accent-glow);
-            background: rgba(25, 25, 25, 0.8);
+            background: linear-gradient(to bottom, rgba(35, 35, 35, 0.7), rgba(25, 25, 25, 0.8));
         }
+
         .tabs {
             display: flex;
             background: rgba(30, 30, 30, 0.6);
@@ -104,6 +115,7 @@
             margin: 0 auto 15px;
             background: linear-gradient(to right, rgba(25, 25, 25, 0.7), rgba(20, 20, 20, 0.8));
         }
+
         .tab {
             padding: 6px 12px;
             text-align: center;
@@ -113,28 +125,33 @@
             font-size: 0.8rem;
             color: var(--text-secondary);
         }
+
         .tab.active {
             background: var(--accent-color);
             color: black;
             box-shadow: 0 2px 6px rgba(255, 255, 255, 0.3);
             background: linear-gradient(to right, white, #e0e0e0);
         }
+
         .scripts-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             animation: fadeIn 0.8s ease;
         }
+
         @media (max-width: 1000px) {
             .scripts-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
         @media (max-width: 600px) {
             .scripts-grid {
                 grid-template-columns: 1fr;
             }
         }
+
         .script-card {
             background: var(--card-bg);
             border-radius: var(--radius-md);
@@ -152,16 +169,19 @@
             background: linear-gradient(to bottom, rgba(25, 25, 25, 0.7), rgba(15, 15, 15, 0.8));
             border-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) 1;
         }
+
         @keyframes cardEnter {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         .script-card:hover {
             transform: translateY(-3px);
             border-color: var(--accent-color);
             box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
             background: linear-gradient(to bottom, rgba(35, 35, 35, 0.7), rgba(25, 25, 25, 0.8));
         }
+
         .script-badge {
             position: absolute;
             top: 8px;
@@ -176,12 +196,14 @@
             background: linear-gradient(to right, white, #e0e0e0);
             box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
         }
+
         .script-image-container {
             width: 100%;
             height: 140px;
             overflow: hidden;
             position: relative;
         }
+
         .script-image-container::before {
             content: '';
             position: absolute;
@@ -192,21 +214,25 @@
             background: linear-gradient(to top, rgba(15, 15, 15, 0.9), transparent);
             z-index: 1;
         }
+
         .script-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s ease;
         }
+
         .script-card:hover .script-image {
             transform: scale(1.05);
         }
+
         .script-content {
             padding: 10px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
         }
+
         .script-title {
             font-size: 0.9rem;
             font-weight: 600;
@@ -216,6 +242,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .script-info {
             color: var(--text-secondary);
             font-size: 0.8rem;
@@ -224,12 +251,14 @@
             align-items: center;
             gap: 4px;
         }
+
         .script-info i {
             color: var(--accent-color);
             width: 12px;
             text-align: center;
             font-size: 0.8rem;
         }
+
         .script-stats {
             display: flex;
             gap: 10px;
@@ -237,16 +266,19 @@
             padding-top: 8px;
             font-size: 0.75rem;
         }
+
         .stat-item {
             display: flex;
             align-items: center;
             gap: 3px;
             color: var(--text-secondary);
         }
+
         .stat-item i {
             color: var(--accent-color);
             font-size: 0.7rem;
         }
+
         .modal {
             display: none;
             position: fixed;
@@ -262,10 +294,12 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
+
         .modal.active {
             display: flex;
             opacity: 1;
         }
+
         .modal-content {
             background: var(--card-bg);
             border-radius: var(--radius-lg);
@@ -279,9 +313,11 @@
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
             background: linear-gradient(to bottom, rgba(25, 25, 25, 0.95), rgba(15, 15, 15, 0.98));
         }
+
         .modal.active .modal-content {
             transform: translateY(0);
         }
+
         .modal-header {
             padding: 10px 15px;
             border-bottom: 1px solid var(--border);
@@ -290,11 +326,13 @@
             align-items: center;
             background: linear-gradient(to right, rgba(30, 30, 30, 0.9), rgba(25, 25, 25, 0.95));
         }
+
         .modal-title {
             font-size: 1rem;
             font-weight: 600;
             color: var(--accent-color);
         }
+
         .modal-close {
             background: none;
             border: none;
@@ -302,14 +340,17 @@
             font-size: 1.2rem;
             cursor: pointer;
         }
+
         .modal-close:hover {
             color: var(--accent-color);
         }
+
         .modal-body {
             padding: 15px;
             overflow-y: auto;
             max-height: calc(70vh - 80px);
         }
+
         .modal-script {
             background: rgba(20, 20, 20, 0.8);
             border-radius: var(--radius-sm);
@@ -325,14 +366,16 @@
             border: 1px solid var(--border);
             background: linear-gradient(to bottom, rgba(30, 30, 30, 0.8), rgba(25, 25, 25, 0.9));
         }
+
         .modal-footer {
             padding: 10px 15px;
             border-top: 1px solid var(--border);
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             gap: 8px;
             background: linear-gradient(to right, rgba(30, 30, 30, 0.9), rgba(25, 25, 25, 0.95));
         }
+
         .btn {
             padding: 6px 12px;
             border: none;
@@ -345,40 +388,40 @@
             justify-content: center;
             gap: 5px;
         }
+
         .btn-primary {
             background: var(--accent-color);
             color: black;
             background: linear-gradient(to right, white, #e0e0e0);
         }
+
         .btn-primary:hover {
             background: linear-gradient(to right, #e0e0e0, white);
             box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
         }
+
         .btn-secondary {
             background: rgba(40, 40, 40, 0.8);
             color: var(--text-color);
             border: 1px solid var(--border);
             background: linear-gradient(to right, rgba(35, 35, 35, 0.8), rgba(30, 30, 30, 0.9));
         }
+
         .btn-secondary:hover {
             background: linear-gradient(to right, rgba(45, 45, 45, 0.8), rgba(40, 40, 40, 0.9));
             border-color: var(--accent-color);
         }
+
         .btn-success {
             background: var(--success);
             color: white;
             background: linear-gradient(to right, #4CAF50, #2E7D32);
         }
+
         .btn-success:hover {
             background: linear-gradient(to right, #2E7D32, #4CAF50);
         }
-        .btn-execute {
-            background: var(--danger);
-            color: white;
-        }
-        .btn-execute:hover {
-            background: linear-gradient(to right, #c62828, #f44336);
-        }
+
         .notification {
             position: fixed;
             bottom: 15px;
@@ -395,35 +438,42 @@
             box-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
             background: linear-gradient(to right, white, #e0e0e0);
         }
+
         @keyframes slideInRight {
             from { transform: translateX(100%); }
             to { transform: translateX(0); }
         }
+
         @keyframes fadeOut {
             to { opacity: 0; }
         }
+
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
             padding: 30px 15px;
             color: var(--text-secondary);
         }
+
         .empty-state i {
             font-size: 1.8rem;
             color: var(--accent-color);
             margin-bottom: 10px;
             opacity: 0.7;
         }
+
         .empty-state h3 {
             font-size: 1rem;
             margin-bottom: 6px;
             color: var(--text-color);
         }
+
         .empty-state p {
             font-size: 0.8rem;
             max-width: 400px;
             margin: 0 auto;
         }
+
         .remove-script-btn {
             position: absolute;
             top: 6px;
@@ -443,15 +493,19 @@
             font-size: 0.6rem;
             background: linear-gradient(to bottom, #f44336, #c62828);
         }
+
         .remove-script-btn:hover {
             background: linear-gradient(to bottom, #c62828, #f44336);
         }
+
         .script-card:hover .remove-script-btn {
             opacity: 1;
         }
+
         .content-section {
             display: none;
         }
+
         .content-section.active {
             display: block;
         }
@@ -462,7 +516,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title" id="modalTitle">Script Details</h3>
-                <button class="modal-close" id="modalClose">&times;</button>
+                <button class="modal-close" id="modalClose">×</button>
             </div>
             <div class="modal-body">
                 <div class="modal-script" id="modalScriptContent">Loading script...</div>
@@ -476,9 +530,10 @@
                     <i class="fas fa-copy"></i>
                     Copy Script
                 </button>
-                </div>
+            </div>
         </div>
     </div>
+
     <div class="floating-search">
         <input type="text" class="search-input" placeholder="Search scripts..." id="searchInput">
         <select class="filter-select" id="scriptType">
@@ -496,18 +551,576 @@
             <option value="50">50</option>
         </select>
     </div>
+
     <div class="tabs">
         <div class="tab active" data-tab="cloud">Cloud Scripts</div>
         <div class="tab" data-tab="saved">Saved Scripts</div>
     </div>
+
     <div class="content-section active" id="cloudScripts">
         <div class="scripts-grid" id="scriptsContainer">
-            <div class="empty-state">
-                <i class="fas fa-spinner fa-spin"></i>
-                <h3>Loading scripts...</h3>
-            </div>
-        </div>
+                    <div class="script-card" style="animation-delay: 0s" data-index="0">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/0-1760596982546.png" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="The Best Script of all Time">The Best Script of all Time</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Universal Script 📌
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>15</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.05s" data-index="1">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/0-1760596330175.png" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="PVB Sysos Script Free and Completely Keyless">PVB Sysos Script Free and Completely Keyless</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Universal Script 📌
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>31</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.1s" data-index="2">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/0-1760594852366.jpg" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="KELL SCRIPT HUB">KELL SCRIPT HUB</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Universal Script 📌
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>62</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.15000000000000002s" data-index="3">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/192800-1757073018174.png" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Pizza Hub 2.0">Pizza Hub 2.0</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                🍕Work at a Pizza Place
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>9,646</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.2s" data-index="4">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/noFilter" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Vail Hub MVSD">Vail Hub MVSD</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                👻 Murderers VS Sheriffs DUELS 👻
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>97</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.25s" data-index="5">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/79546208627805-1760593901348.jpg" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="99 Nights Days Farm">99 Nights Days Farm</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                99 Nights in the Forest 🔦
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>69</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.30000000000000004s" data-index="6">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/noFilter(1)" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="MVSD Script Release 6">MVSD Script Release 6</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                👻 Murderers VS Sheriffs DUELS 👻
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>16,458</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.35000000000000003s" data-index="7">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/0-1760591254177.png" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Plants vs Brainrots Luminary HUB">Plants vs Brainrots Luminary HUB</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Universal Script 📌
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>133</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.4s" data-index="8">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/12355337193-1760591153565.png" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Luminary HUB">Luminary HUB</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                👻 Murderers VS Sheriffs DUELS 👻
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>95</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.45s" data-index="9">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/9731376817-1760591078473.png" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Luminary HUB">Luminary HUB</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                ✨Collect The Body
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>82</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.5s" data-index="10">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/0-1760590058766.png" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Stream Sniper Or Player Sniper">Stream Sniper Or Player Sniper</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Universal Script 📌
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>120</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.55s" data-index="11">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/0-1758493699972.jpg" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Gaze emotes V1.3">Gaze emotes V1.3</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Universal Script 📌
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>31,017</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.6000000000000001s" data-index="12">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/0-1760589028204.jpg" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Watligma backdoor scanner">Watligma backdoor scanner</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Universal Script 📌
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>133</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.65s" data-index="13">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/noFilter(2)" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="AWT">AWT</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                [Limited] War Tycoon
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>134</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.7000000000000001s" data-index="14">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/noFilter(3)" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Elude Hub 99 NIFT">Elude Hub 99 NIFT</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                99 Nights in the Forest 🔦
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>1,066</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.75s" data-index="15">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/noFilter(4)" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Brookhaven Audio Player FE">Brookhaven Audio Player FE</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Brookhaven 🏡RP
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>192</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.8s" data-index="16">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/79546208627805-1757234080193.png" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Insta Win| Inf diamonds | God Mode | Kill Aura | Bring Stuff">Insta Win| Inf diamonds | God Mode | Kill Aura | Bring Stuff</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                99 Nights in the Forest 🔦
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>149,996</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.8500000000000001s" data-index="17">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/noFilter(5)" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="inf money">inf money</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Make a Brainrot Army⚔️[war]
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>306</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.9s" data-index="18">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/noFilter(6)" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="CoronaX Hub by anom4ly no key stud simulator">CoronaX Hub by anom4ly no key stud simulator</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                Stud Simulator [BETA]
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>184</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="script-card" style="animation-delay: 0.9500000000000001s" data-index="19">
+                        
+                        <div class="script-image-container">
+                            <img src="./scripthub_files/noFilter(7)" class="script-image" onerror="this.src=&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=&#39;">
+                        </div>
+                        <div class="script-content">
+                            <h3 class="script-title" title="Steal a brainrot modded op">Steal a brainrot modded op</h3>
+                            <p class="script-info">
+                                <i class="fas fa-gamepad"></i>
+                                🥶 Steal A Brainrots: BEST EDITION!
+                            </p>
+                            <div class="script-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>299</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>N/A</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
     </div>
+
     <div class="content-section" id="savedScripts">
         <div class="scripts-grid" id="localScriptsGrid">
             <div class="empty-state">
@@ -517,6 +1130,7 @@
             </div>
         </div>
     </div>
+
     <div class="notification" id="notification">
         <i class="fas fa-check-circle"></i>
         <span>Script copied!</span>
@@ -527,34 +1141,29 @@
         let totalPages = 1;
         let currentScriptIndex = -1;
         let currentScript = null;
-        
-        // SỬ DỤNG SERVERLESS PROXY FUNCTION TRÊN VERCEL
-        const BASE_API_PROXY = '/api/scriptblox-proxy'; 
-        
+        const proxies = [
+            'https://api.codetabs.com/v1/proxy/?quest=',
+            'https://thingproxy.freeboard.io/fetch/',
+            'https://corsproxy.io/?'
+        ];
+        let currentProxy = 0;
         let currentTab = 'cloud';
-        
+
         function getLocalScripts() {
             const scripts = localStorage.getItem('savedScripts');
             return scripts ? JSON.parse(scripts) : [];
         }
+
         function saveLocalScript(script) {
             const scripts = getLocalScripts();
-            
-            const scriptToSave = {
-                title: script.title || 'Untitled',
-                script: script.script || '',
-                image: script.image || null,
-                game: script.game?.name || script.game || null, 
-                date: script.updatedAt || new Date().toISOString()
-            };
-
-            if (!scripts.some(s => s.title === scriptToSave.title && s.script === scriptToSave.script)) {
-                scripts.push(scriptToSave);
+            if (!scripts.some(s => s.title === script.title && s.script === script.script)) {
+                scripts.push(script);
                 localStorage.setItem('savedScripts', JSON.stringify(scripts));
                 return true;
             }
             return false;
         }
+
         function removeLocalScript(index) {
             const scripts = getLocalScripts();
             scripts.splice(index, 1);
@@ -562,9 +1171,11 @@
             renderLocalScripts();
             return scripts;
         }
+
         function renderLocalScripts() {
             const container = document.getElementById('localScriptsGrid');
             const scripts = getLocalScripts();
+            
             if (scripts.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -575,10 +1186,9 @@
                 `;
                 return;
             }
+            
             let html = '';
             scripts.forEach((script, index) => {
-                const gameName = script.game && typeof script.game === 'object' ? script.game.name : script.game || 'No game specified';
-                
                 html += `
                     <div class="script-card" style="animation-delay: ${index * 0.05}s">
                         <button class="remove-script-btn" data-index="${index}">
@@ -586,16 +1196,16 @@
                         </button>
                         <div class="script-image-container">
                             <img
-                                src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc='}"
+                                src="${script.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}"
                                 class="script-image"
-                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVlciIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2IwYjBiMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+SW1hZ2UgRXJyb3I8L3RleHQ+PC9zdmc+'"
+                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMzMzMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='"
                             >
                         </div>
                         <div class="script-content">
                             <h3 class="script-title" title="${script.title}">${script.title}</h3>
                             <p class="script-info">
                                 <i class="fas fa-gamepad"></i>
-                                ${gameName}
+                                ${script.game || 'No game specified'}
                             </p>
                             <div class="script-stats">
                                 <div class="stat-item">
@@ -611,10 +1221,13 @@
                     </div>
                 `;
             });
+            
             container.innerHTML = html;
+            
             document.querySelectorAll('#localScriptsGrid .btn-primary').forEach(btn => {
                 btn.addEventListener('click', handleLocalCopy);
             });
+            
             document.querySelectorAll('.remove-script-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -623,14 +1236,18 @@
                     showMessage('Script removed from your collection');
                 });
             });
+            
             document.querySelectorAll('#localScriptsGrid .script-card').forEach(card => {
                 card.addEventListener('click', (e) => {
                     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    
                     const index = Array.from(card.parentElement.children).indexOf(card);
-                    openScriptModal(index, true); 
+                    const scripts = getLocalScripts();
+                    openScriptModal(index, true);
                 });
             });
         }
+
         function switchTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.tab').forEach(t => {
@@ -639,38 +1256,35 @@
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.toggle('active', section.id === `${tab}Scripts`);
             });
+            
             if (tab === 'saved') {
                 renderLocalScripts();
             }
         }
-        async function fetchWithTimeout(url, timeout = 10000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
+
+        async function fetchWithRetry(url, retries = 3) {
             try {
-                const response = await fetch(url, { signal: controller.signal });
-                clearTimeout(id);
-                // Cải tiến: Nếu lỗi 404, thông báo chính xác là proxy file bị thiếu
-                if (response.status === 404 && url.includes(BASE_API_PROXY)) {
-                    throw new Error("HTTP Error: 404 (Proxy File Missing). Vui lòng tạo lại file api/scriptblox-proxy.js");
-                }
-                if (!response.ok) {
-                    let errorMessage = `HTTP Error: ${response.status} ${response.statusText}`;
-                    try {
-                        // Thử đọc chi tiết lỗi từ proxy
-                        const errorBody = await response.json();
-                        if (errorBody.error) errorMessage += ` (Detail: ${errorBody.details})`;
-                    } catch (e) { 
-                        // Nếu không phải JSON, lỗi thường là do Vercel/Proxy, không phải lỗi từ API gốc
+                const proxyUrl = proxies[currentProxy] + encodeURIComponent(url);
+                const response = await fetch(proxyUrl, {
+                    headers: {
+                        'Accept': 'application/json'
                     }
-                    throw new Error(errorMessage);
-                }
-                return await response.json();
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                
+                const data = await response.json();
+                return data;
             } catch (error) {
-                clearTimeout(id);
+                if (retries > 0) {
+                    currentProxy = (currentProxy + 1) % proxies.length;
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return fetchWithRetry(url, retries - 1);
+                }
                 throw error;
             }
         }
-        
+
         async function loadScripts(search = '', page = 1) {
             const container = document.getElementById('scriptsContainer');
             container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><h3>Loading scripts...</h3></div>';
@@ -680,71 +1294,73 @@
                 const sortBy = document.getElementById('sortBy').value;
                 const maxResults = document.getElementById('maxResults').value;
                 
-                // 1. Tạo query string để gửi lên Proxy
-                let queryParams = new URLSearchParams();
-                queryParams.append('q', search.trim()); 
-                queryParams.append('page', page);
-                queryParams.append('max', maxResults);
+                let apiUrl;
+                if (search) {
+                    apiUrl = `https://scriptblox.com/api/script/search?q=${encodeURIComponent(search)}&page=${page}&max=${maxResults}`;
+                } else {
+                    apiUrl = `https://scriptblox.com/api/script/fetch?page=${page}&max=${maxResults}`;
+                }
                 
-                if (scriptType === 'paid') queryParams.append('paid', 'true');
-                if (scriptType === 'free') queryParams.append('paid', 'false');
-                if (sortBy) queryParams.append('sortBy', sortBy);
+                if (scriptType) apiUrl += `&mode=${scriptType}`;
+                if (sortBy) apiUrl += `&sortBy=${sortBy}`;
                 
-                // Dùng đường dẫn Proxy
-                const finalFetchUrl = `${BASE_API_PROXY}?${queryParams.toString()}`;
-
-                const data = await fetchWithTimeout(finalFetchUrl, 10000); 
+                let data;
+                try {
+                    const response = await fetch(apiUrl);
+                    data = await response.json();
+                } catch (directError) {
+                    console.log('Direct fetch failed, using proxy...');
+                    data = await fetchWithRetry(apiUrl);
+                }
                 
-                scriptsData = [];
-                totalPages = 1;
-                let finalResult = data.result || data.data || data; 
-
-                if (finalResult && typeof finalResult === 'object') {
-                    if (Array.isArray(finalResult.scripts)) {
-                        scriptsData = finalResult.scripts;
-                        totalPages = finalResult.totalPages || 1;
-                    } else if (Array.isArray(finalResult)) {
-                        scriptsData = finalResult;
-                    }
-                } else if (Array.isArray(data)) {
+                if (data && data.result && data.result.scripts) {
+                    scriptsData = data.result.scripts;
+                    totalPages = data.result.totalPages || 1;
+                } else if (data && Array.isArray(data)) {
                     scriptsData = data;
+                    totalPages = 1;
+                } else {
+                    scriptsData = [];
+                    totalPages = 1;
                 }
                 
                 currentPage = page;
-                renderScripts();
                 
+                renderScripts();
             } catch (error) {
                 console.error('Error fetching scripts:', error);
-                // Hiển thị chi tiết lỗi Proxy
+                showMessage(`Error: ${error.message}`);
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <h3>PROXY ERROR: Cannot Connect</h3>
-                        <p>Ứng dụng không thể kết nối đến Proxy <code>/api/scriptblox-proxy</code>.</p>
-                        <p style="font-size: 0.7rem; margin-top: 10px;">Chi tiết: ${error.message}</p>
+                        <h3>Failed to load scripts</h3>
+                        <p>We couldn't connect to the server. Please check your internet connection and try again.</p>
                     </div>
                 `;
             }
         }
-        
+
         function renderScripts() {
             const container = document.getElementById('scriptsContainer');
+            
             if (scriptsData.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-search"></i>
                         <h3>No scripts found</h3>
-                        <p>Thử điều chỉnh tìm kiếm hoặc bộ lọc.</p>
+                        <p>Try adjusting your search or filters to find what you're looking for.</p>
                     </div>
                 `;
                 return;
             }
+            
             let html = '';
             scriptsData.forEach((script, index) => {
                 const raw = script.image;
                 const imageUrl = raw
                     ? (raw.startsWith('http') ? raw : `https://scriptblox.com${raw}`)
                     : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMzAwIDE4MCI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMyNTI1MjUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjYjBiMGIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+    
                 html += `
                     <div class="script-card" style="animation-delay: ${index * 0.05}s" data-index="${index}">
                         ${script.paid ? '<span class="script-badge">Premium</span>' : ''}
@@ -779,15 +1395,19 @@
                     </div>
                 `;
             });
+            
             container.innerHTML = html;
+            
             document.querySelectorAll('.script-card').forEach(card => {
                 card.addEventListener('click', (e) => {
                     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    
                     const index = card.dataset.index;
                     openScriptModal(index);
                 });
             });
         }
+
         function openScriptModal(index, isLocal = false) {
             let script;
             if (isLocal) {
@@ -798,108 +1418,167 @@
                 script = scriptsData[index];
                 currentScript = {...script, isLocal: false, index: index};
             }
+            
             if (!script) return;
+            
             const modal = document.getElementById('scriptModal');
             const modalTitle = document.getElementById('modalTitle');
             const modalContent = document.getElementById('modalScriptContent');
+            const modalCopyBtn = document.getElementById('modalCopyButton');
             const saveScriptBtn = document.getElementById('saveScriptBtn');
+            
             modalTitle.textContent = script.title;
-            modalContent.textContent = script.script || 'No script content available'; 
+            modalContent.textContent = script.script || 'No script content available';
+            
             const scripts = getLocalScripts();
-            const isSaved = scripts.some(s => s.title === script.title && s.script === script.script); 
+            const isSaved = scripts.some(s => s.title === script.title && s.script === script.script);
+            
             if (isSaved) {
                 saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
                 saveScriptBtn.classList.add('btn-success');
                 saveScriptBtn.classList.remove('btn-secondary');
             } else {
                 saveScriptBtn.innerHTML = '<i class="fas fa-bookmark"></i> Save Script';
-                saveScriptBtn.classList.remove('btn-success'); 
                 saveScriptBtn.classList.add('btn-secondary');
+                saveScriptBtn.classList.remove('btn-success');
             }
-            modal.classList.add('active');
-        }
-        function showMessage(message) {
-            const notification = document.getElementById('notification');
-            notification.style.animation = 'none';
-            notification.offsetHeight; 
-            notification.style.animation = null; 
-
-            notification.querySelector('span').textContent = message;
-            notification.style.display = 'block';
             
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            modalCopyBtn.onclick = () => {
+                navigator.clipboard.writeText(script.script).then(() => {
+                    showMessage('Script copied to clipboard!');
+                }).catch(err => {
+                    showMessage('Failed to copy script');
+                    console.error('Failed to copy:', err);
+                });
+            };
         }
+
+        function closeScriptModal() {
+            const modal = document.getElementById('scriptModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            currentScript = null;
+        }
+
+        function saveCurrentScript() {
+            if (!currentScript) return;
+            
+            const scriptToSave = {
+                title: currentScript.title,
+                script: currentScript.script,
+                game: currentScript.game?.name || 'No game specified',
+                image: currentScript.image,
+                date: new Date().toISOString()
+            };
+            
+            const saved = saveLocalScript(scriptToSave);
+            const saveScriptBtn = document.getElementById('saveScriptBtn');
+            
+            if (saved) {
+                saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+                saveScriptBtn.classList.add('btn-success');
+                saveScriptBtn.classList.remove('btn-secondary');
+                showMessage('Script saved to your collection!');
+                
+                if (currentTab === 'saved') {
+                    renderLocalScripts();
+                }
+            } else {
+                showMessage('This script is already in your collection');
+            }
+        }
+
         function handleLocalCopy(event) {
-            const button = event.currentTarget;
-            const index = button.dataset.index;
+            event.stopPropagation();
+            const index = event.target.dataset.index;
             const scripts = getLocalScripts();
             const script = scripts[index];
-            if (script && script.script) {
-                navigator.clipboard.writeText(script.script)
-                    .then(() => showMessage('Script copied!'))
-                    .catch(err => console.error('Could not copy text: ', err));
+            
+            if (!script) {
+                showMessage('No script found');
+                return;
             }
+
+            navigator.clipboard.writeText(script.script).then(() => {
+                showMessage('Script copied to clipboard!');
+                
+                const button = event.target;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.classList.add('btn-success');
+                button.classList.remove('btn-primary');
+                
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy Script';
+                    button.classList.add('btn-primary');
+                    button.classList.remove('btn-success');
+                }, 2000);
+            }).catch(err => {
+                showMessage('Failed to copy script');
+                console.error('Failed to copy:', err);
+            });
         }
+
+        function searchScripts() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            loadScripts(searchTerm, 1);
+        }
+
+        function showMessage(text) {
+            const notif = document.getElementById('notification');
+            notif.querySelector('span').textContent = text;
+            notif.style.display = 'flex';
+            notif.style.animation = 'none';
+            void notif.offsetWidth;
+            notif.style.animation = 'slideInRight 0.5s ease, fadeOut 0.5s ease 2.5s forwards';
+        }
+
+        function setupFilterListeners() {
+            document.getElementById('scriptType').addEventListener('change', searchScripts);
+            document.getElementById('sortBy').addEventListener('change', searchScripts);
+            document.getElementById('maxResults').addEventListener('change', searchScripts);
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this, args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('searchInput');
-            const scriptType = document.getElementById('scriptType');
-            const sortBy = document.getElementById('sortBy');
-            const maxResults = document.getElementById('maxResults');
-            const modal = document.getElementById('scriptModal');
-            const modalClose = document.getElementById('modalClose');
-            const modalCopyButton = document.getElementById('modalCopyButton');
-            const saveScriptBtn = document.getElementById('saveScriptBtn');
-            const tabs = document.querySelectorAll('.tab');
-            
-            searchInput.addEventListener('input', () => {
-                clearTimeout(searchInput.timer);
-                searchInput.timer = setTimeout(() => loadScripts(searchInput.value), 700);
-            });
-            
-            scriptType.addEventListener('change', () => loadScripts(searchInput.value));
-            sortBy.addEventListener('change', () => loadScripts(searchInput.value));
-            maxResults.addEventListener('change', () => loadScripts(searchInput.value));
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
-            });
-            
-            modalClose.addEventListener('click', () => {
-                modal.classList.remove('active');
-            });
-            
-            window.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-            
-            modalCopyButton.addEventListener('click', () => {
-                if (currentScript && currentScript.script) {
-                    navigator.clipboard.writeText(currentScript.script)
-                        .then(() => showMessage('Script copied!'))
-                        .catch(err => console.error('Could not copy text: ', err));
-                }
-            });
-            
-            saveScriptBtn.addEventListener('click', () => {
-                if (currentScript) {
-                    const success = saveLocalScript(currentScript);
-                    if (success) {
-                        showMessage('Script saved successfully!');
-                        saveScriptBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
-                        saveScriptBtn.classList.add('btn-success');
-                        saveScriptBtn.classList.remove('btn-secondary');
-                    } else {
-                        showMessage('Script is already in your collection.');
-                    }
-                }
-            });
-            
             loadScripts();
+            setupFilterListeners();
+            
+            const searchInput = document.getElementById('searchInput');
+            const debouncedSearch = debounce(searchScripts, 500);
+            searchInput.addEventListener('input', debouncedSearch);
+            
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchScripts();
+            });
+            
+            document.getElementById('modalClose').addEventListener('click', closeScriptModal);
+            
+            document.getElementById('scriptModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('scriptModal')) {
+                    closeScriptModal();
+                }
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+            
+            document.getElementById('saveScriptBtn').addEventListener('click', saveCurrentScript);
         });
     </script>
-</body>
-</html>
+
+
+</body></html>
